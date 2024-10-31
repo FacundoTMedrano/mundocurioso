@@ -3,7 +3,6 @@ import CustomErrors from "../errors/index.js";
 // import User from "../models/mongoose/User.js";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
-import { sendVerificationEmail } from "../utils/sendVerificationEmail.js";
 import { makeAccess, makeRefresh } from "../utils/jwt.js";
 import { sendResetEmail } from "../utils/sendResetEmail.js";
 import { verifyReturnData } from "../utils/jwt.js";
