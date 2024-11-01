@@ -1,18 +1,20 @@
 import { StatusCodes } from "http-status-codes";
 import CustomErrors from "../errors/index.js";
-// import User from "../models/mongoose/User.js";
+import pool from "../config/db.js";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
-import { makeAccess, makeRefresh } from "../utils/jwt.js";
 import { sendResetEmail } from "../utils/sendResetEmail.js";
-import { verifyReturnData } from "../utils/jwt.js";
+import { verifyReturnData, makeAccess, makeRefresh } from "../utils/jwt.js";
+import { ORIGIN, REFRESH_TOKEN_SECRET } from "../config/process.js";
 import z from "zod";
+import ms from "ms";
 
+//como no tiene path o domain entonces al borrar deberia poder sin poner las opciones
 const cookie = {
     httpOnly: true,
     secure: true,
     sameSite: "Lax",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    maxAge: ms("7d"),
 };
 
 export class AuthController {
@@ -23,58 +25,53 @@ export class AuthController {
                 password: z.string(),
             })
             .safeParse(req.body);
+
         if (!validate.success) {
             throw new CustomErrors.BadRequestError(
                 "Please provide email and password"
             );
         }
-        const user = await User.findOne({ email: validate.data.email });
+
+        const query = `
+        SELECT * FROM admin 
+        WHERE email = $1;
+      `;
+        const values = [validate.data.email];
+        const response = await pool.query(query, values);
+        const user = response.rows[0];
+
         if (!user) {
             throw new CustomErrors.UnauthenticatedError("invalid credentials");
         }
+
         const match = await bcrypt.compare(
             validate.data.password,
             user.password
         );
+
         if (!match) {
             console.log("mal password");
             throw new CustomErrors.UnauthenticatedError("invalid credentials");
         }
-        if (!user.isVerified) {
-            throw new CustomErrors.UnauthenticatedError(
-                "Please verify your email"
-            );
-        }
 
-        const jwt = req?.cookies?.jwt;
-        if (jwt) {
-            // eslint-disable-next-line no-unused-vars
-            const { maxAge, ...restoDeLaCookie } = cookie; //al parecer se debe pasar sin maxage
-            res.clearCookie("jwt", restoDeLaCookie);
-        }
+        const accessToken = makeAccess({ user: user.id });
 
-        const accessToken = makeAccess({
-            user: { id: user._id, role: user.role },
-        });
-        const refreshToken = makeRefresh({ user: { id: user._id } });
+        const refreshToken = makeRefresh({ user: user.id });
 
         res.cookie("jwt", refreshToken, cookie);
 
         res.status(StatusCodes.OK).json({
-            role: user.role,
             accessToken,
-            name: user.name,
-            email: user.email,
-            id: user._id,
+            id: user.id,
         });
     }
 
     async logOut(req, res) {
         const jwt = req?.cookies?.jwt;
         if (jwt) {
-            // eslint-disable-next-line no-unused-vars
-            const { maxAge, ...restoDeLaCookie } = cookie; //al parecer se debe pasar sin maxage
-            res.clearCookie("jwt", restoDeLaCookie);
+            // const { maxAge, ...restoDeLaCookie } = cookie; //al parecer se debe pasar sin maxage
+            // res.clearCookie("jwt", restoDeLaCookie);
+            res.clearCookie("jwt");
         }
 
         return res.status(StatusCodes.NO_CONTENT).send();
@@ -88,18 +85,22 @@ export class AuthController {
             );
         }
 
-        // eslint-disable-next-line no-unused-vars
-        const { maxAge, ...restoDeLaCookie } = cookie; //al parecer se debe pasar sin maxage
-        res.clearCookie("jwt", restoDeLaCookie);
+        res.clearCookie("jwt");
 
         const decode = await verifyReturnData(
             refreshToken,
-            // eslint-disable-next-line no-undef
-            process.env.REFRESH_TOKEN_SECRET
+            REFRESH_TOKEN_SECRET
         );
+
         if (!decode) throw new CustomErrors.UnauthorizedError("bad token");
 
-        const user = await User.findById(decode.user.id);
+        const query = `
+        SELECT * FROM admin 
+        WHERE id = $1;
+      `;
+        const values = [decode.user];
+        const response = await pool.query(query, values);
+        const user = response.rows[0];
 
         if (!user) {
             throw new CustomErrors.UnauthorizedError(
@@ -107,22 +108,15 @@ export class AuthController {
             );
         }
 
-        const accessToken = makeAccess({
-            user: { id: user._id, role: user.role },
-        });
+        const accessToken = makeAccess({ user: user.id });
 
-        const newRefreshToken = makeRefresh({
-            user: { id: user._id },
-        });
+        const newRefreshToken = makeRefresh({ user: user.id });
 
         res.cookie("jwt", newRefreshToken, cookie);
 
         return res.status(StatusCodes.CREATED).json({
-            role: user.role,
             accessToken,
-            name: user.name,
-            email: user.email,
-            id: user._id,
+            id: user.id,
         });
     }
 
@@ -138,7 +132,15 @@ export class AuthController {
                 "Please provide valid email"
             );
         }
-        const user = await User.findOne({ email: email.data.email });
+
+        const query = `
+        SELECT * FROM admin 
+        WHERE email = $1;
+      `;
+        const values = [email.data.email];
+        const response = await pool.query(query, values);
+        const user = response.rows[0];
+
         if (!user) {
             throw new CustomErrors.BadRequestError(
                 "Please provide valid email"
@@ -148,19 +150,26 @@ export class AuthController {
         const passwordTokenHash = await bcrypt.hash(passwordToken, 10);
 
         await sendResetEmail({
-            name: user.name,
             email: user.email,
             token: passwordToken,
-            // eslint-disable-next-line no-undef
-            origin: process.env.ORIGIN,
+            origin: ORIGIN,
         });
 
-        const tenMinutes = 1000 * 60 * 10;
-        const passwordTokenExpirationDate = new Date(Date.now() + tenMinutes); //debe hacerse con orario mundial
+        const password_token_expiration_date = new Date(Date.now() + ms("10m")); //debe hacerse con orario mundial
+        const queryUpdate = `
+        UPDATE admin SET password_token = $1,
+        password_token_expiration_date = $2
+        WHERE email = $3
+        `;
 
-        user.passwordToken = passwordTokenHash;
-        user.passwordTokenExpirationDate = passwordTokenExpirationDate;
-        await user.save();
+        const valuesUpdate = [
+            passwordTokenHash,
+            password_token_expiration_date,
+            user.email,
+        ];
+        await pool.query(queryUpdate, valuesUpdate);
+
+        // await user.save();
 
         res.status(StatusCodes.OK).json({
             msg: "Please check your email for reset password link",
@@ -180,15 +189,20 @@ export class AuthController {
             throw new CustomErrors.BadRequestError("Please provide all values");
         }
 
-        const user = await User.findOne({ email: validacion.data.email });
+        const query = `
+        SELECT * FROM admin 
+        WHERE email = $1;
+      `;
+        const values = [validacion.data.email];
+        const response = await pool.query(query, values);
+        const user = response.rows[0];
+
         if (!user) {
-            throw new CustomErrors.BadRequestError(
-                "Please provide valid values"
-            );
+            throw new CustomErrors.UnauthenticatedError("invalid credentials");
         }
 
         const match = await bcrypt.compare(
-            user.passwordToken,
+            user.password_token,
             validacion.data.token
         );
 
@@ -198,7 +212,7 @@ export class AuthController {
             );
         }
         const currentDate = new Date();
-        if (user.passwordTokenExpirationDate > currentDate) {
+        if (user.password_token_expiration_date > currentDate) {
             const passHashed = await bcrypt.hash(validacion.data.password, 10);
             user.password = passHashed;
             user.passwordToken = null;

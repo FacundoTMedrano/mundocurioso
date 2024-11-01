@@ -14,18 +14,6 @@ export function makeRefresh(values, time = "7d") {
     });
 }
 
-export function verify(token, secret) {
-    return new Promise((resolve, reject) => {
-        jwt.verify(token, secret, (err, decode) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(decode);
-            }
-        });
-    });
-}
-
 export function verifyReturnData(token, secret) {
     return new Promise((resolve) => {
         jwt.verify(token, secret, (err, decode) => {

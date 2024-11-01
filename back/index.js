@@ -11,10 +11,9 @@ import helmet from "helmet";
 import cors from "cors";
 import { corsOptions } from "./config/corsConfig.js";
 
-import { verifyJWT } from "./middlewares/verifyJWT.js";
+// import { verifyJWT } from "./middlewares/verifyJWT.js";
 
 import authRouter from "./routes/authRouter.js";
-import userRouter from "./routes/userRouter.js";
 
 import connectDB from "./config/db.js";
 connectDB();
@@ -33,7 +32,7 @@ app.use("/imgs", express.static("imgs"));
 app.use(helmet());
 
 app.use("/auth", authRouter);
-app.use("/admin", verifyJWT, userRouter);
+// app.use("/admin", verifyJWT, userRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
