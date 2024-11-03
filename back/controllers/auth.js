@@ -69,9 +69,9 @@ export class AuthController {
     async logOut(req, res) {
         const jwt = req?.cookies?.jwt;
         if (jwt) {
-            // const { maxAge, ...restoDeLaCookie } = cookie; //al parecer se debe pasar sin maxage
-            // res.clearCookie("jwt", restoDeLaCookie);
-            res.clearCookie("jwt");
+            // eslint-disable-next-line no-unused-vars
+            const { maxAge, ...restoDeLaCookie } = cookie; //al parecer se debe pasar sin maxage
+            res.clearCookie("jwt", restoDeLaCookie);
         }
 
         return res.status(StatusCodes.NO_CONTENT).send();
@@ -85,7 +85,9 @@ export class AuthController {
             );
         }
 
-        res.clearCookie("jwt");
+        // eslint-disable-next-line no-unused-vars
+        const { maxAge, ...restoDeLaCookie } = cookie; //al parecer se debe pasar sin maxage
+        res.clearCookie("jwt", restoDeLaCookie);
 
         const decode = await verifyReturnData(
             refreshToken,
@@ -190,9 +192,9 @@ export class AuthController {
         }
 
         const query = `
-        SELECT * FROM admin 
-        WHERE email = $1;
-      `;
+            SELECT * FROM admin 
+            WHERE email = $1;
+        `;
         const values = [validacion.data.email];
         const response = await pool.query(query, values);
         const user = response.rows[0];
@@ -212,26 +214,27 @@ export class AuthController {
             );
         }
         const currentDate = new Date();
-        if (user.password_token_expiration_date > currentDate) {
-            const passHashed = await bcrypt.hash(validacion.data.password, 10);
-            user.password = passHashed;
-            user.passwordToken = null;
-            user.passwordTokenExpirationDate = null;
-            await user.save();
-        } else {
-            user.passwordToken = null;
-            user.passwordTokenExpirationDate = null;
-            throw new CustomErrors.BadRequestError(
-                "Please provide valid values"
-            );
+
+        if (user.password_token_expiration_date < currentDate) {
+            throw new CustomErrors.BadRequestError("token expired");
         }
+
+        const passHashed = await bcrypt.hash(validacion.data.password, 10);
+        const queryUpdate = `
+            UPDATE admin SET password = $1,
+            password_token = $2,
+            password_token_expiration_date = $3
+            WHERE email = $4
+        `;
+        const valuesUpdate = [passHashed, null, null, validacion.data.email];
+        await pool.query(queryUpdate, valuesUpdate);
+
         res.status(StatusCodes.OK).json({
             msg: "reset password",
         });
     }
 
     async cambiarPassword(req, res) {
-        console.log(req.body);
         const validacion = z
             .object({
                 oldPassword: z.string(),
@@ -250,7 +253,14 @@ export class AuthController {
             throw new CustomErrors.BadRequestError("Please provide all values");
         }
 
-        const user = await User.findById(req.id);
+        const query = `
+            SELECT * FROM admin 
+            WHERE id = $1;
+        `;
+        const values = [req.id];
+        const response = await pool.query(query, values);
+        const user = response.rows[0];
+
         if (!user) {
             throw new CustomErrors.BadRequestError("Please provide all values");
         }
@@ -259,6 +269,7 @@ export class AuthController {
             validacion.data.oldPassword,
             user.password
         );
+
         if (!match) {
             throw new CustomErrors.BadRequestError(
                 "Please provide valid values"
@@ -267,8 +278,13 @@ export class AuthController {
 
         const newPassword = await bcrypt.hash(validacion.data.newPassword, 10);
 
-        user.password = newPassword;
-        await user.save();
+        const queryUpdate = `
+            UPDATE admin SET password = $1
+            WHERE id = $2
+        `;
+        const valuesUpdate = [newPassword, user.id];
+        await pool.query(queryUpdate, valuesUpdate);
+
         res.status(StatusCodes.OK).json({
             msg: "password change",
         });

@@ -1,5 +1,4 @@
-import dotenv from "dotenv";
-dotenv.config();
+import { PORT } from "./config/process.js";
 import "express-async-errors";
 
 import express from "express";
@@ -14,9 +13,7 @@ import { corsOptions } from "./config/corsConfig.js";
 // import { verifyJWT } from "./middlewares/verifyJWT.js";
 
 import authRouter from "./routes/authRouter.js";
-
-import connectDB from "./config/db.js";
-connectDB();
+import curiosidadesRouter from "./routes/curiosidadesRouter.js";
 
 import notFoundMiddleware from "./middlewares/notFound.js";
 import errorHandlerMiddleware from "./middlewares/error-handler.js";
@@ -32,13 +29,10 @@ app.use("/imgs", express.static("imgs"));
 app.use(helmet());
 
 app.use("/auth", authRouter);
-// app.use("/admin", verifyJWT, userRouter);
+app.use("/curiosidades", curiosidadesRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
-
-// eslint-disable-next-line no-undef
-const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
     console.log(`server listening on port http://localhost:${PORT}`);

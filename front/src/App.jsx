@@ -1,35 +1,53 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Routes, Route } from "react-router-dom";
+import Dashboard from "./pages/Dashboard";
+import Home from "./pages/Home";
+import Categoria from "./pages/Categoria";
+import Search from "./pages/Search";
+import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
+import AuthGate from "./pages/AuthGate";
+import AuthReq from "./pages/AuthReq";
+import Admin from "./pages/Admin";
+import AdminDash from "./pages/AdminDash";
+import AdminCategoria from "./pages/AdminCategoria";
+import AdminSearch from "./pages/AdminSearch";
+import CrearCuriosidad from "./pages/CrearCuriosidad";
+import EditarCuriosidad from "./pages/EditarCuriosidad";
+// import { GiAstronautHelmet } from "react-icons/gi"; logo
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+    return (
+        <Routes>
+            <Route path="login" element={<Login />} />
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+            <Route path="/" element={<Dashboard />}>
+                <Route index element={<Home />} />
+                <Route path="categoria/:categoria" element={<Categoria />} />
+                <Route path="search/:search" element={<Search />} />
+            </Route>
+
+            <Route element={<AuthGate />}>
+                <Route element={<AuthReq />}>
+                    <Route path="Admin" element={<Admin />}>
+                        <Route index element={<AdminDash />} />
+                        <Route path="crear" element={<CrearCuriosidad />} />
+                        <Route
+                            path="editar/:id"
+                            element={<EditarCuriosidad />}
+                        />
+                        <Route
+                            path="categoria/:categoria"
+                            element={<AdminCategoria />}
+                        />
+                        <Route
+                            path="search/:search"
+                            element={<AdminSearch />}
+                        />
+                    </Route>
+                </Route>
+            </Route>
+
+            <Route path="*" element={<NotFound />} />
+        </Routes>
+    );
 }
-
-export default App

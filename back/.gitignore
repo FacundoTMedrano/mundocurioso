@@ -8,6 +8,8 @@ node_modules/
 .env
 .txt
 
-imgs/basics/
-imgs/big/
-imgs/medium/
+imgs/
+
+curiosidades-html/
+
+notas.txt
