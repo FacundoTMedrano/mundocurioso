@@ -1,1 +1,2 @@
-1- cambiar la ubicacion donde se guardan las imagenes 
+1- hacer que se puedan cambiar las imagenes de categoria y portada
+2- manejar el tamaño de las imagenes que se reciben

@@ -1,0 +1,23 @@
+@use "variables" as v;
+:root {
+    h1,
+    h2,
+    h3 {
+        text-align: center;
+        font-family: v.$fuente-primaria;
+    }
+
+    p {
+        font-family: v.$fuente-secundaria;
+    }
+
+    li {
+        list-style: none;
+    }
+
+    a {
+        display: block;
+        text-decoration: none;
+        font-family: v.$fuente-secundaria;
+    }
+}

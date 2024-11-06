@@ -1,17 +1,20 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import JoditEditor from "jodit-react";
 import { useForm } from "react-hook-form";
 import CargarUnaImagen from "../components/CargarUnaImagen";
 import categorias from "../constants/categorias";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import aceptedCategories from "../utils/aceptedCategories";
 
 export default function CrearCuriosidad() {
     const axiosPrivate = useAxiosPrivate();
     const queryClient = useQueryClient();
 
+    const editorRef = useRef(null);
     const [content, setContent] = useState("");
     const [contentErr, setContentErr] = useState("");
+
     const [img, setImg] = useState({
         img: null,
         file: null,
@@ -39,27 +42,39 @@ export default function CrearCuriosidad() {
         formState: { errors },
         getValues,
         setError,
+        trigger,
         clearErrors,
     } = useForm();
+
     const config = useMemo(() => {
         return {
             uploader: {
                 insertImageAsBase64URI: true,
             },
-            readonly: false,
         };
     }, []);
 
     function prepareSend(data) {
-        //preparar todos los datos para ser enviados
-        console.log(img.file)
-        console.log(data);
+        const form = new FormData();
+        form.append("imagen", img.file);
+
+        const datos = {
+            titulo: data.titulo,
+            subtitulo: data.subtitulo,
+            categorias: aceptedCategories(data.categoria),
+            curiosidad: content,
+        };
+
+        form.append("datos", JSON.stringify(datos));
+
+        crear.mutate(form);
     }
 
-    function findErrors() {
+    async function findErrors() {
         //busqueda de errores
-        const { categoria } = getValues();
         let errores = false;
+
+        const { categoria } = getValues();
         const categoriasSeleccionadas =
             Object.values(categoria).filter(Boolean);
         if (categoriasSeleccionadas.length === 0) {
@@ -81,17 +96,27 @@ export default function CrearCuriosidad() {
             });
             errores = true;
         }
+
+        const allRigth = await trigger();
+
+        if (!allRigth) {
+            errores = true;
+        }
         return errores;
     }
 
-    function handleForm(e) {
+    async function handleForm(e) {
         e.preventDefault();
-        const errorEnImgs = findErrors();
-        handleSubmit((data) => {
-            if (!errorEnImgs) {
-                prepareSend(data);
-            }
-        })();
+        const errorEnImgs = await findErrors();
+        if (!errorEnImgs) {
+            console.log("si ingreso");
+            handleSubmit(prepareSend)();
+        }
+        // handleSubmit((data) => {
+        //     if (!errorEnImgs) {
+        //         prepareSend(data);
+        //     }
+        // })();
     }
 
     return (
@@ -131,7 +156,9 @@ export default function CrearCuriosidad() {
                                         type="checkbox"
                                         {...register(`categoria.${categoria}`, {
                                             onChange: () => {
-                                                clearErrors("categoria");
+                                                if (errors.categoria) {
+                                                    clearErrors("categoria");
+                                                }
                                             },
                                         })}
                                     />
@@ -144,6 +171,7 @@ export default function CrearCuriosidad() {
                 </div>
                 <div className="jodit-div">
                     <JoditEditor
+                        ref={editorRef}
                         value={content}
                         config={config}
                         onBlur={(newContent) => setContent(newContent)}

@@ -3,8 +3,8 @@ import CustomAPIErrors from "../errors/index.js";
 import { ACCESS_TOKEN_SECRET as secret } from "../config/process.js";
 
 export async function verifyJWT(req, _, next) {
-    const authHeader = req.headers?.authorization.startsWith("Bearer ");
-    if (!authHeader) {
+    const authHeader = req.headers?.authorization;
+    if (!authHeader?.startsWith("Bearer ")) {
         throw new CustomAPIErrors.UnauthenticatedError("require token verify"); //401
     }
 
