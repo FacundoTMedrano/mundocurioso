@@ -1,0 +1,39 @@
+@use "variables" as v;
+
+.back-next {
+    border: 1px solid black;
+    display: flex;
+    width: fit-content;
+    margin: auto;
+    margin-bottom: 1rem;
+
+    .back,
+    .next {
+        background: none;
+        border: none;
+        background-color: v.$color-1;
+
+        &:hover {
+            cursor: pointer;
+        }
+        &:disabled {
+            .back-icon,
+            .next-icon {
+                color: rgb(153, 153, 153);
+            }
+        }
+        .back-icon,
+        .next-icon {
+            display: flex;
+            color: white;
+            font-size: 2rem;
+        }
+    }
+    .page {
+        display: flex;
+        align-items: center;
+        font-size: 1.5rem;
+        margin: 0;
+        padding: 0.4rem 0.7rem;
+    }
+}

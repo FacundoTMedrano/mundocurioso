@@ -1,0 +1,30 @@
+@use "variables" as v;
+.curiosidad-page {
+    margin: auto;
+    padding: 0 20px;
+    max-width: 50rem;
+
+    .curiosidad-titulo-subtitulo {
+        h2 {
+            color: v.$color-1;
+        }
+        p {
+            color: v.$color-2;
+        }
+    }
+    .curiosidad-div-img {
+        margin: auto;
+        width: fit-content;
+        padding: 10px;
+        img {
+            width: 100%;
+            max-width: 1000px;
+        }
+    }
+    .articulo-html {
+        img{
+            max-width: 100%;
+            height: auto;
+        }
+    }
+}

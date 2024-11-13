@@ -3,7 +3,7 @@ import UnauthenticatedError from "./unauthenticated.js";
 import NotFoundError from "./not-found.js";
 import BadRequestError from "./bad-request.js";
 import UnauthorizedError from "./unauthorized.js";
-
+import ConflictError from "./conflict.js";
 
 export default {
     CustomAPIError,
@@ -11,4 +11,5 @@ export default {
     NotFoundError,
     BadRequestError,
     UnauthorizedError,
+    ConflictError,
 };

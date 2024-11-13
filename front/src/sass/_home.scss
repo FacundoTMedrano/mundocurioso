@@ -1,0 +1,18 @@
+@use "variables" as v;
+
+.home-page {
+    .ver-mas-curiosidades {
+        width: fit-content;
+        margin: auto;
+        padding: 0.8rem;
+        margin-block: 2rem;
+        background-color: v.$color-1;
+        border-radius: 10px;
+        color: white;
+        transition: all 250ms ease;
+
+        &:hover {
+            transform: scale(1.05);
+        }
+    }
+}

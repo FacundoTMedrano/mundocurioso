@@ -5,7 +5,7 @@
 
     .portada-home {
         background-image: url("http://localhost:5173/imgs/portada.webp");
-        background-position: 40% 20%;
+        background-position: 40% 30%;
         background-repeat: no-repeat;
         background-size: cover;
 
@@ -18,17 +18,23 @@
                 position: relative;
                 z-index: 100000;
                 margin-top: 0;
-                color: white;
                 padding: 4rem;
                 margin-bottom: 0;
+                display: flex;
+                justify-content: center;
+                a {
+                    color: white;
+                }
             }
         }
     }
 
     .dash {
         .burger {
-            position: absolute;
-            top: 0;
+            position: fixed;
+            top: 12px;
+            border-radius: 10px;
+            background-color: black;
             right: 10px; //por alguna razon funciona mal si no esta separado del borde
             color: white;
             z-index: 100000;
@@ -71,12 +77,12 @@
 
             nav {
                 ul {
-                    padding-top: 2rem;
+                    padding-top: 3rem;
                     padding-left: 0.5rem;
 
                     @media (min-width: v.$breakpoint-large-big-desktop) {
                         display: grid;
-                        grid-template-columns: repeat(11, 1fr);
+                        grid-template-columns: repeat(12, 1fr);
                         text-align: center;
                         justify-content: center;
                         padding: 0rem 0;
@@ -85,7 +91,22 @@
                         max-width: 100rem;
                     }
                 }
-
+                .input-busqueda {
+                    input {
+                        border-radius: 8px;
+                        border: 1px solid black;
+                        text-indent: 0.5rem;
+                        font-family: v.$fuente-secundaria;
+                        // box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, 0.315);
+                    }
+                    @media (min-width: v.$breakpoint-large-big-desktop) {
+                        order: 1;
+                        padding-right: 1rem;
+                        input {
+                            max-width: 10rem;
+                        }
+                    }
+                }
                 li {
                     padding-block: 0.5rem;
                 }
@@ -97,8 +118,7 @@
                     transition: all 100ms ease;
 
                     @media (min-width: v.$breakpoint-large-big-desktop) {
-                        margin: 0 .5rem;
-
+                        margin: 0 0.5rem;
                     }
 
                     &:hover {

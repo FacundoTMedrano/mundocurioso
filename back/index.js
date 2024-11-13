@@ -14,6 +14,7 @@ import { corsOptions } from "./config/corsConfig.js";
 
 import authRouter from "./routes/authRouter.js";
 import curiosidadesRouter from "./routes/curiosidadesRouter.js";
+import categoriasPortadaRouter from "./routes/categoriasPortadaRouter.js";
 
 import notFoundMiddleware from "./middlewares/notFound.js";
 import errorHandlerMiddleware from "./middlewares/error-handler.js";
@@ -29,6 +30,7 @@ app.use("/imgs", express.static("imgs"));
 app.use(helmet());
 
 app.use("/auth", authRouter);
+app.use("/categorias-portada", categoriasPortadaRouter);
 app.use("/curiosidades", curiosidadesRouter);
 
 app.use(notFoundMiddleware);

@@ -42,9 +42,12 @@ const upload = multer({
 
 const curiosidades = new CuriusidadesController();
 
-router.get("/", curiosidades.verTodo);
+router.get("/vertodo", curiosidades.verTodo);
+router.get("/curiosidad/:curiosidad", curiosidades.curiosidad);
+router.get("/curiosidad/por-id/:id", curiosidades.curiosidadPorId);
 router.get("/categoria", curiosidades.porCategoria);
 router.get("/search", curiosidades.porBusqueda);
+
 router.post("/crear", verifyJWT, upload.single("imagen"), curiosidades.crear);
 router.put("/:id", verifyJWT, upload.single("imagen"), curiosidades.update);
 router.delete("/:id", verifyJWT, curiosidades.delete);

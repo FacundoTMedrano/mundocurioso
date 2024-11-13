@@ -112,32 +112,31 @@ export default function CrearCuriosidad() {
             console.log("si ingreso");
             handleSubmit(prepareSend)();
         }
-        // handleSubmit((data) => {
-        //     if (!errorEnImgs) {
-        //         prepareSend(data);
-        //     }
-        // })();
     }
 
     return (
-        <div>
+        <div className="crear-curiosidad">
             <h1>Crear Curiosidad</h1>
             <form onSubmit={handleForm}>
                 <div>
-                    <h2>Previsualizacion</h2>
                     <CargarUnaImagen img={img} setImg={setImg} />
-                    <div>
+                    <div className="titulo-form">
                         <label htmlFor="titulo-Form">Titulo</label>
                         <input
                             id="titulo-Form"
                             type="text"
                             placeholder="titulo"
                             required
-                            {...register("titulo")}
+                            {...register("titulo", {
+                                max: {
+                                    value: 300,
+                                    message: "debe ser menor a 300 letras",
+                                },
+                            })}
                         />
                         {errors.titulo && <p>{errors.titulo.message}</p>}
                     </div>
-                    <div>
+                    <div className="subtitulo-form">
                         <label htmlFor="subtitulo-Form">Subtitulo</label>
                         <textarea
                             id="subtitulo-Form"
@@ -148,12 +147,13 @@ export default function CrearCuriosidad() {
                         />
                         {errors.subtitulo && <p>{errors.subtitulo.message}</p>}
                     </div>
-                    <div>
-                        <div>
+                    <div className="categorias-select">
+                        <div className="select-box">
                             {categorias.map((categoria) => (
-                                <label key={categoria}>
+                                <div key={categoria} className="div-checkbox">
                                     <input
                                         type="checkbox"
+                                        id={`div-checkbox${categoria}`}
                                         {...register(`categoria.${categoria}`, {
                                             onChange: () => {
                                                 if (errors.categoria) {
@@ -162,8 +162,10 @@ export default function CrearCuriosidad() {
                                             },
                                         })}
                                     />
-                                    {categoria}
-                                </label>
+                                    <label htmlFor={`div-checkbox${categoria}`}>
+                                        {categoria}
+                                    </label>
+                                </div>
                             ))}
                         </div>
                         {errors.categoria && <p>{errors.categoria.message}</p>}
@@ -178,7 +180,9 @@ export default function CrearCuriosidad() {
                     />
                     {contentErr && <p>{contentErr}</p>}
                 </div>
-                <button type="submit">Aceptar</button>
+                <div className="boton-aceptar">
+                    <button type="submit">Aceptar</button>
+                </div>
             </form>
         </div>
     );

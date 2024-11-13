@@ -1,49 +1,48 @@
 import { useSearchParams } from "react-router-dom";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { axiosPublic } from "../services/api";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { MdNavigateNext, MdNavigateBefore } from "react-icons/md";
 import CuriosidadesGrid from "../components/CuriosidadesGrid";
 
-export default function Categoria() {
+export default function VerTodo() {
     const [searchParams, setSearchParams] = useSearchParams();
 
-    const categoria = searchParams.get("categoria") || ""; // Si no existe, retorna una cadena vacía
     const page = Number(searchParams.get("page") || 1);
 
-    console.log(categoria, page);
-
     const curiosidades = useQuery({
-        queryKey: ["curiosidades", { categoria, page }],
+        queryKey: ["curiosidades", { search: "", page }],
         queryFn: async () => {
-            const result = await axiosPublic(`curiosidades/categoria`, {
-                params: { categoria, page, page_size: 10 },
+            const { data } = await axiosPublic(`curiosidades/vertodo`, {
+                params: { search: "", page, page_size: 10 },
             });
-            return result.data;
+            console.log(data);
+            return data;
         },
         refetchOnWindowFocus: false,
         placeholderData: keepPreviousData,
     });
 
     function goToNextPage() {
-        setSearchParams({ categoria, page: page + 1 });
+        setSearchParams({ page: page + 1 });
     }
 
     function goToPreviousPage() {
-        setSearchParams({ categoria, page: page - 1 });
+        setSearchParams({ page: page - 1 });
     }
 
     if (curiosidades.isLoading) {
-        return <p>loading...</p>;
+        return <p>cargando</p>;
     }
-
     if (curiosidades.isError) {
-        return <p>Error</p>;
+        return <p>error al cargar los datos</p>;
     }
 
     return (
         <main>
-            <h2>{categoria.replaceAll("-", " ")}</h2>
+            <h2>Curiosidades</h2>
+
             <CuriosidadesGrid curiosidades={curiosidades.data.curiosidades} />
+
             <div className="back-next">
                 <button
                     className="back"
@@ -68,7 +67,12 @@ export default function Categoria() {
                     </div>
                 </button>
             </div>
-            {curiosidades.isFetching && <span>Cargando...</span>}
+
+            {curiosidades.isFetching && (
+                <div>
+                    <span>Cargando...</span>
+                </div>
+            )}
         </main>
     );
 }

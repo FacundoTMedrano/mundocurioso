@@ -1,0 +1,118 @@
+@use "variables" as v;
+
+.imagen-box {
+    width: fit-content;
+    margin: auto;
+
+    .imagen {
+        width: 300px;
+        height: 300px;
+        margin: auto;
+        border: 1px solid rgba(128, 128, 128, 0.637);
+        box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.096);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        img {
+            display: block;
+            width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        p {
+            font-family: v.$fuente-secundaria;
+        }
+    }
+    > p {
+        color: red;
+        font-family: v.$fuente-secundaria;
+        text-align: center;
+    }
+
+    input[type="file"] {
+        display: none;
+    }
+
+    .botones {
+        font-family: v.$fuente-secundaria;
+        display: flex;
+        justify-content: center;
+        gap: 0.8rem;
+        margin: 0.8rem auto 1rem auto;
+
+        button {
+            cursor: pointer;
+            display: block;
+            background-color: v.$color-1;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            // padding: 10px 20px;
+            padding: 0.3rem 0.7rem;
+            font-family: v.$fuente-secundaria;
+
+            &:hover {
+                background-color: v.$color-2;
+            }
+        }
+    }
+}
+
+.crear-curiosidad {
+    .titulo-form,
+    .subtitulo-form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 1rem;
+
+        input,
+        textarea {
+            width: 100%;
+            max-width: 30rem;
+        }
+    }
+    .categorias-select {
+        margin-bottom: 1rem;
+        .select-box {
+            width: fit-content;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            font-size: 1.2rem;
+            gap: 0.3rem;
+
+            .div-checkbox {
+                label {
+                    padding-left: 0.2rem;
+                }
+            }
+        }
+    }
+
+    .boton-aceptar {
+        font-family: v.$fuente-secundaria;
+        display: flex;
+        justify-content: center;
+        gap: 0.8rem;
+        margin: 0.8rem auto 1rem auto;
+
+        button {
+            cursor: pointer;
+            display: block;
+            background-color: v.$color-1;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            // padding: 10px 20px;
+            padding: 0.3rem 0.7rem;
+            font-family: v.$fuente-secundaria;
+
+            &:hover {
+                background-color: v.$color-2;
+            }
+        }
+    }
+}

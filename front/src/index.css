@@ -1,11 +1,25 @@
 @import url("https://fonts.googleapis.com/css2?family=Arimo:ital,wght@1,400..700&family=Lexend:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap");
+.home-page .ver-mas-curiosidades {
+  width: fit-content;
+  margin: auto;
+  padding: 0.8rem;
+  margin-block: 2rem;
+  background-color: rgb(32, 30, 67);
+  border-radius: 10px;
+  color: white;
+  transition: all 250ms ease;
+}
+.home-page .ver-mas-curiosidades:hover {
+  transform: scale(1.05);
+}
+
 .header-dash {
   position: relative;
 }
 .header-dash .portada-home {
   background-image: url("http://localhost:5173/imgs/portada.webp");
-  background-position: 40% 20%;
+  background-position: 40% 30%;
   background-repeat: no-repeat;
   background-size: cover;
 }
@@ -18,13 +32,19 @@
   position: relative;
   z-index: 100000;
   margin-top: 0;
-  color: white;
   padding: 4rem;
   margin-bottom: 0;
+  display: flex;
+  justify-content: center;
+}
+.header-dash .portada-home .opacity-portada h1 a {
+  color: white;
 }
 .header-dash .dash .burger {
-  position: absolute;
-  top: 0;
+  position: fixed;
+  top: 12px;
+  border-radius: 10px;
+  background-color: black;
   right: 10px;
   color: white;
   z-index: 100000;
@@ -65,19 +85,34 @@
   opacity: 1;
 }
 .header-dash .dash .menu nav ul {
-  padding-top: 2rem;
+  padding-top: 3rem;
   padding-left: 0.5rem;
 }
 @media (min-width: 1500px) {
   .header-dash .dash .menu nav ul {
     display: grid;
-    grid-template-columns: repeat(11, 1fr);
+    grid-template-columns: repeat(12, 1fr);
     text-align: center;
     justify-content: center;
     padding: 0rem 0;
     margin: 0 auto;
     align-items: center;
     max-width: 100rem;
+  }
+}
+.header-dash .dash .menu nav .input-busqueda input {
+  border-radius: 8px;
+  border: 1px solid black;
+  text-indent: 0.5rem;
+  font-family: "Noto Sans", sans-serif;
+}
+@media (min-width: 1500px) {
+  .header-dash .dash .menu nav .input-busqueda {
+    order: 1;
+    padding-right: 1rem;
+  }
+  .header-dash .dash .menu nav .input-busqueda input {
+    max-width: 10rem;
   }
 }
 .header-dash .dash .menu nav li {
@@ -106,9 +141,19 @@
 
 :root h1,
 :root h2,
-:root h3 {
+:root h3,
+:root h4,
+:root h5,
+:root h6 {
   text-align: center;
   font-family: "Arimo", sans-serif;
+  color: rgb(32, 30, 67);
+}
+:root input,
+:root label,
+:root textarea,
+:root input::placeholder {
+  font-family: "Noto Sans", sans-serif;
 }
 :root p {
   font-family: "Noto Sans", sans-serif;
@@ -120,6 +165,576 @@
   display: block;
   text-decoration: none;
   font-family: "Noto Sans", sans-serif;
+}
+
+.categoria-ver-page {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  margin: 0 auto;
+  padding: 0 10px;
+  max-width: 70rem;
+}
+@media (min-width: 768px) {
+  .categoria-ver-page {
+    grid-template-columns: 1fr;
+  }
+}
+.categoria-ver-page .contenedor-div a {
+  margin: 1rem;
+}
+@media (min-width: 768px) {
+  .categoria-ver-page .contenedor-div a {
+    display: flex;
+    align-items: center;
+  }
+}
+@media (min-width: 768px) {
+  .categoria-ver-page .contenedor-div a .imagen-div {
+    width: 30%;
+  }
+}
+.categoria-ver-page .contenedor-div a .imagen-div img {
+  width: 100%;
+  max-height: 40rem;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  border-radius: 8px;
+}
+@media (min-width: 768px) {
+  .categoria-ver-page .contenedor-div a .titulo-subtitulo {
+    padding-left: 1rem;
+    width: 70%;
+  }
+}
+.categoria-ver-page .contenedor-div a .titulo-subtitulo h3 {
+  color: rgb(32, 30, 67);
+  transition: all 250ms ease;
+  text-align: left;
+}
+.categoria-ver-page .contenedor-div a .titulo-subtitulo p {
+  color: rgb(19, 75, 112);
+  line-height: 1.3rem;
+}
+@media (min-width: 768px) {
+  .categoria-ver-page .contenedor-div a .titulo-subtitulo p {
+    font-size: 1.1rem;
+  }
+}
+.categoria-ver-page .contenedor-div a:hover .titulo-subtitulo h3 {
+  text-decoration: underline;
+}
+
+.back-next {
+  border: 1px solid black;
+  display: flex;
+  width: fit-content;
+  margin: auto;
+  margin-bottom: 1rem;
+}
+.back-next .back,
+.back-next .next {
+  background: none;
+  border: none;
+  background-color: rgb(32, 30, 67);
+}
+.back-next .back:hover,
+.back-next .next:hover {
+  cursor: pointer;
+}
+.back-next .back:disabled .back-icon,
+.back-next .back:disabled .next-icon,
+.back-next .next:disabled .back-icon,
+.back-next .next:disabled .next-icon {
+  color: rgb(153, 153, 153);
+}
+.back-next .back .back-icon,
+.back-next .back .next-icon,
+.back-next .next .back-icon,
+.back-next .next .next-icon {
+  display: flex;
+  color: white;
+  font-size: 2rem;
+}
+.back-next .page {
+  display: flex;
+  align-items: center;
+  font-size: 1.5rem;
+  margin: 0;
+  padding: 0.4rem 0.7rem;
+}
+
+.contenedor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  margin: 0 auto;
+  padding: 0 10px;
+  max-width: 1450px;
+}
+.contenedor-grid .div-imagen a {
+  margin: 1rem;
+}
+.contenedor-grid .div-imagen a img {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.contenedor-grid .div-imagen a h3 {
+  color: rgb(32, 30, 67);
+  transition: all 250ms ease;
+}
+.contenedor-grid .div-imagen a:hover h3 {
+  transform: scale(1.1);
+}
+
+.curiosidad-page {
+  margin: auto;
+  padding: 0 20px;
+  max-width: 50rem;
+}
+.curiosidad-page .curiosidad-titulo-subtitulo h2 {
+  color: rgb(32, 30, 67);
+}
+.curiosidad-page .curiosidad-titulo-subtitulo p {
+  color: rgb(19, 75, 112);
+}
+.curiosidad-page .curiosidad-div-img {
+  margin: auto;
+  width: fit-content;
+  padding: 10px;
+}
+.curiosidad-page .curiosidad-div-img img {
+  width: 100%;
+  max-width: 1000px;
+}
+.curiosidad-page .articulo-html img {
+  max-width: 100%;
+  height: auto;
+}
+
+.search-page .buscador {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.search-page .buscador .lupa {
+  font-size: 1.5rem;
+  padding-right: 0.3rem;
+  margin-bottom: -3px;
+}
+.login-page {
+  padding: 10px;
+  padding-top: 18vh;
+}
+.login-page .contenedor {
+  border: 1px solid rgba(128, 128, 128, 0.637);
+  box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.096);
+  border-radius: 15px;
+  padding: 20px;
+  margin: 1.5rem auto 0.5rem auto;
+  max-width: 25rem;
+}
+.login-page .contenedor h1 {
+  text-align: center;
+  font-family: "Arimo", sans-serif;
+  color: rgb(32, 30, 67);
+}
+.login-page .contenedor form {
+  display: flex;
+  flex-direction: column;
+  font-family: "Noto Sans", sans-serif;
+}
+.login-page .contenedor form div {
+  display: flex;
+  flex-direction: column;
+  margin: 0.4rem 0;
+}
+.login-page .contenedor form div label {
+  margin-bottom: 0.2rem;
+}
+.login-page .contenedor form button {
+  margin: auto;
+  margin-top: 0.8rem;
+  padding: 0.1rem 0.8rem;
+  padding-bottom: 0.25rem;
+}
+
+.categoria-ver-page-admin {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  margin: 0 auto;
+  padding: 0 10px;
+  max-width: 70rem;
+}
+@media (min-width: 768px) {
+  .categoria-ver-page-admin {
+    grid-template-columns: 1fr;
+  }
+}
+.categoria-ver-page-admin .contenedor-div a {
+  margin: 1rem;
+}
+@media (min-width: 768px) {
+  .categoria-ver-page-admin .contenedor-div a {
+    display: flex;
+    align-items: center;
+  }
+}
+@media (min-width: 768px) {
+  .categoria-ver-page-admin .contenedor-div a .imagen-div {
+    width: 30%;
+  }
+}
+.categoria-ver-page-admin .contenedor-div a .imagen-div img {
+  width: 100%;
+  max-height: 40rem;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  border-radius: 8px;
+}
+@media (min-width: 768px) {
+  .categoria-ver-page-admin .contenedor-div a .titulo-subtitulo {
+    padding-left: 1rem;
+    width: 70%;
+  }
+}
+.categoria-ver-page-admin .contenedor-div a .titulo-subtitulo h3 {
+  color: rgb(32, 30, 67);
+  transition: all 250ms ease;
+  text-align: left;
+}
+.categoria-ver-page-admin .contenedor-div a .titulo-subtitulo p {
+  color: rgb(19, 75, 112);
+  line-height: 1.3rem;
+}
+@media (min-width: 768px) {
+  .categoria-ver-page-admin .contenedor-div a .titulo-subtitulo p {
+    font-size: 1.1rem;
+  }
+}
+.categoria-ver-page-admin .contenedor-div a:hover .titulo-subtitulo h3 {
+  text-decoration: underline;
+}
+.categoria-ver-page-admin .botones {
+  display: flex;
+  width: fit-content;
+  margin: auto;
+  margin-bottom: 1rem;
+}
+.categoria-ver-page-admin .botones a {
+  font-family: "Noto Sans", sans-serif;
+  color: rgb(238, 238, 238);
+  background-color: rgb(32, 30, 67);
+  margin: 0;
+  padding: 1rem;
+  margin-right: 0.3rem;
+  border-radius: 10px;
+}
+.categoria-ver-page-admin .botones button {
+  margin: 0;
+  margin-left: 0.3rem;
+  padding: 1rem;
+  font-family: "Noto Sans", sans-serif;
+  border: 1px solid black;
+  color: rgb(238, 238, 238);
+  background-color: rgb(32, 30, 67);
+  border-radius: 10px;
+}
+.categoria-ver-page-admin .botones button:hover {
+  cursor: pointer;
+}
+
+.header-dash-admin {
+  position: relative;
+}
+.header-dash-admin .dash .burger {
+  position: fixed;
+  top: 12px;
+  border-radius: 10px;
+  background-color: black;
+  right: 10px;
+  color: white;
+  z-index: 100000;
+}
+.header-dash-admin .dash .menu {
+  z-index: 10000;
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  max-width: 17rem;
+  background-color: rgba(0, 0, 0, 0.596);
+  overflow: scroll;
+  transform: translateX(100%);
+  visibility: hidden;
+  opacity: 0;
+  transition: all 500ms ease;
+}
+.header-dash-admin .dash .menu.open {
+  transform: translateX(0%);
+  visibility: visible;
+  opacity: 1;
+}
+.header-dash-admin .dash .menu nav .primer-ul {
+  padding-top: 3rem;
+  padding-left: 0.5rem;
+}
+.header-dash-admin .dash .menu nav .primer-ul > li {
+  padding-block: 0.5rem;
+}
+.header-dash-admin .dash .menu nav .primer-ul > li .link-categorias {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.header-dash-admin .dash .menu nav .primer-ul > li .link-categorias:hover .text-div button {
+  border-left: 5px solid white;
+}
+.header-dash-admin .dash .menu nav .primer-ul > li .link-categorias .text-div a {
+  display: none;
+  color: white;
+  font-size: 1.1rem;
+  border-left: 0 solid white;
+  transition: all 100ms ease;
+}
+.header-dash-admin .dash .menu nav .primer-ul > li .link-categorias .text-div a:hover {
+  border-left: 5px solid white;
+}
+.header-dash-admin .dash .menu nav .primer-ul > li .link-categorias .text-div button {
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: "Noto Sans", sans-serif;
+  color: white;
+  font-size: 1.1rem;
+  border-left: 0 solid white;
+  transition: all 100ms ease;
+}
+.header-dash-admin .dash .menu nav .primer-ul > li .link-categorias .svg-div {
+  display: flex;
+  align-items: center;
+  color: white;
+  padding-left: 0.5rem;
+}
+.header-dash-admin .dash .menu nav .primer-ul > li .link-categorias .svg-div svg {
+  cursor: pointer;
+  transform: scale(2);
+  transition: all 100ms;
+}
+.header-dash-admin .dash .menu nav .primer-ul > li .link-categorias .svg-div.open svg {
+  transform: scale(2) rotate(90deg);
+}
+.header-dash-admin .dash .menu nav .primer-ul > li .categorias-div {
+  overflow: hidden;
+  height: 0;
+  transition: all 100ms ease;
+}
+.header-dash-admin .dash .menu nav .primer-ul > li .categorias-div ul {
+  padding-left: 1.5rem;
+}
+.header-dash-admin .dash .menu nav .primer-ul > li .categorias-div ul li {
+  padding-block: 0.3rem;
+}
+.header-dash-admin .dash .menu nav .primer-ul > li .categorias-div ul li a {
+  color: white;
+  font-size: 1.1rem;
+  border-left: 0 solid white;
+  transition: all 100ms ease;
+}
+.header-dash-admin .dash .menu nav .primer-ul > li .categorias-div ul li a:hover {
+  border-left: 5px solid white;
+}
+.header-dash-admin .dash .menu nav .primer-ul > li .categorias-div.open {
+  height: 19rem;
+}
+.header-dash-admin .dash .menu nav .primer-ul > li .input-busqueda input {
+  border-radius: 8px;
+  border: 1px solid black;
+  text-indent: 0.5rem;
+  font-family: "Noto Sans", sans-serif;
+}
+.header-dash-admin .dash .menu nav .primer-ul > li .link a {
+  color: white;
+  font-size: 1.1rem;
+  border-left: 0 solid white;
+  transition: all 100ms ease;
+}
+.header-dash-admin .dash .menu nav .primer-ul > li .link a:hover {
+  border-left: 5px solid white;
+}
+.header-dash-admin .dash .menu nav .primer-ul > li .logout {
+  display: flex;
+}
+.header-dash-admin .dash .menu nav .primer-ul > li .logout button {
+  cursor: pointer;
+  background: none;
+  background-color: rgb(32, 30, 67);
+  border-radius: 10px;
+  padding: 0.4rem 0.6rem;
+  border: none;
+  font-family: "Noto Sans", sans-serif;
+  color: rgb(240, 77, 77);
+  font-size: 1.1rem;
+  transition: all 100ms ease;
+  margin: auto;
+}
+.header-dash-admin .dash .menu nav .primer-ul > li .logout button:hover {
+  transform: scale(1.05);
+}
+
+.contenedor-grid-admin {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  margin: 0 auto;
+  padding: 0 10px;
+  max-width: 1450px;
+}
+.contenedor-grid-admin .div-imagen {
+  margin: 1rem;
+}
+.contenedor-grid-admin .div-imagen img {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.contenedor-grid-admin .div-imagen .div-imagen-botones {
+  display: flex;
+  justify-content: center;
+}
+.contenedor-grid-admin .div-imagen .div-imagen-botones button {
+  cursor: pointer;
+  margin: 0 0.3rem;
+  font-family: "Noto Sans", sans-serif;
+  font-size: 1.1rem;
+  padding: 0.2rem 0.5rem;
+}
+
+.cambiar-portada .portada {
+  width: 100%;
+  height: 11rem;
+  overflow: hidden;
+}
+.cambiar-portada .portada img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 40% 30%;
+}
+.cambiar-portada .botones-input,
+.cambiar-portada .div-boton-enviar {
+  display: flex;
+  justify-content: center;
+  margin: 1rem;
+}
+.cambiar-portada .botones-input button,
+.cambiar-portada .div-boton-enviar button {
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  font-family: "Noto Sans", sans-serif;
+  margin: 0.2rem;
+}
+
+.imagen-box {
+  width: fit-content;
+  margin: auto;
+}
+.imagen-box .imagen {
+  width: 300px;
+  height: 300px;
+  margin: auto;
+  border: 1px solid rgba(128, 128, 128, 0.637);
+  box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.096);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.imagen-box .imagen img {
+  display: block;
+  width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.imagen-box .imagen p {
+  font-family: "Noto Sans", sans-serif;
+}
+.imagen-box > p {
+  color: red;
+  font-family: "Noto Sans", sans-serif;
+  text-align: center;
+}
+.imagen-box input[type=file] {
+  display: none;
+}
+.imagen-box .botones {
+  font-family: "Noto Sans", sans-serif;
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  margin: 0.8rem auto 1rem auto;
+}
+.imagen-box .botones button {
+  cursor: pointer;
+  display: block;
+  background-color: rgb(32, 30, 67);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 0.3rem 0.7rem;
+  font-family: "Noto Sans", sans-serif;
+}
+.imagen-box .botones button:hover {
+  background-color: rgb(19, 75, 112);
+}
+
+.crear-curiosidad .titulo-form,
+.crear-curiosidad .subtitulo-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.crear-curiosidad .titulo-form input,
+.crear-curiosidad .titulo-form textarea,
+.crear-curiosidad .subtitulo-form input,
+.crear-curiosidad .subtitulo-form textarea {
+  width: 100%;
+  max-width: 30rem;
+}
+.crear-curiosidad .categorias-select {
+  margin-bottom: 1rem;
+}
+.crear-curiosidad .categorias-select .select-box {
+  width: fit-content;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  font-size: 1.2rem;
+  gap: 0.3rem;
+}
+.crear-curiosidad .categorias-select .select-box .div-checkbox label {
+  padding-left: 0.2rem;
+}
+.crear-curiosidad .boton-aceptar {
+  font-family: "Noto Sans", sans-serif;
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  margin: 0.8rem auto 1rem auto;
+}
+.crear-curiosidad .boton-aceptar button {
+  cursor: pointer;
+  display: block;
+  background-color: rgb(32, 30, 67);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 0.3rem 0.7rem;
+  font-family: "Noto Sans", sans-serif;
+}
+.crear-curiosidad .boton-aceptar button:hover {
+  background-color: rgb(19, 75, 112);
 }
 
 /*# sourceMappingURL=index.css.map */

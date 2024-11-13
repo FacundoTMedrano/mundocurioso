@@ -1,0 +1,62 @@
+@use "variables" as v;
+.categoria-ver-page {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    margin: 0 auto;
+    padding: 0 10px;
+    max-width: 70rem;
+
+    @media (min-width: v.$breakpoint-tablet) {
+        grid-template-columns: 1fr;
+    }
+
+    .contenedor-div {
+        a {
+            margin: 1rem;
+
+            @media (min-width: v.$breakpoint-tablet) {
+                display: flex;
+                align-items: center;
+            }
+
+            .imagen-div {
+                @media (min-width: v.$breakpoint-tablet) {
+                    width: 30%;
+                }
+                img {
+                    width: 100%;
+                    max-height: 40rem;
+                    aspect-ratio: 4/3;
+                    object-fit: cover;
+                    border-radius: 8px;
+                }
+            }
+
+            .titulo-subtitulo {
+                @media (min-width: v.$breakpoint-tablet) {
+                    padding-left: 1rem;
+                    width: 70%;
+                }
+                h3 {
+                    color: v.$color-1;
+                    transition: all 250ms ease;
+                    text-align: left;
+                }
+
+                p {
+                    color: v.$color-2;
+                    line-height: 1.3rem;
+                    @media (min-width: v.$breakpoint-tablet) {
+                        font-size: 1.1rem;
+                    }
+                }
+            }
+
+            &:hover {
+                .titulo-subtitulo h3 {
+                    text-decoration: underline;
+                }
+            }
+        }
+    }
+}

@@ -1,51 +1,53 @@
 import { StatusCodes } from "http-status-codes";
 import CustomErrors from "../errors/index.js";
-import pool from "../config/db.js";
 import z from "zod";
-import fs from "node:fs/promises";
-import path from "node:path";
-import { nanoid } from "nanoid";
 import sharp from "sharp";
+import isExistImage from "../utils/isExistImage.js";
 
 export default class CategoriasPortada {
     async cambiarCategoriaImg(req, res) {
-        if (!req.params.id || !req.file) {
+        console.log(req.files, req.body.nombres);
+        if (!req.body.nombres || !req.files) {
             throw new CustomErrors.NotFoundError("datos no provistos");
         }
-        const validate = z.number().safeParse(Number(req.params.id));
+        const validate = z.array(z.string()).safeParse([...req.body.nombres]);
         if (!validate.success) {
             throw new CustomErrors.BadRequestError("datos erroneos");
         }
-
-        const categoria = await pool
-            .query(
-                `
-                SELECT * FROM categorias
-                WHERE id = $1
-            `,
-                [validate.data]
-            )
-            .then((data) => data.rows[0]);
-
-        if (!categoria) {
-            throw new CustomErrors.BadRequestError("categoria no encontrada");
+        const nombres = req.body.nombres;
+        for (let i = 0; i < nombres.length; i++) {
+            const nombre = nombres[i].replaceAll(" ", "-");
+            const isExist = await isExistImage(
+                `imgs/categorias/medium/${nombre}.webp`
+            );
+            if (!isExist) {
+                throw new CustomErrors.BadRequestError("error en la direccion");
+            }
         }
-        const nombre = `${categoria.nombre.replace(" ", "-")}.webp`;
-        await Promise.all([
-            fs.unlink(`imgs/categorias/medium/${nombre}`),
-            fs.unlink(`imgs/categorias/small/${nombre}`),
-        ]);
 
-        const file = req.file;
-        await fs.writeFile(
-            `imgs/categorias/medium/${categoria.nombre}`,
-            file.buffer
-        );
-        const metadata = await sharp(file.buffer).metadata();
-        const mitadancho = Math.floor(metadata.width / 2);
-        const mitadAlto = Math.floor(metadata.height / 2);
-        await sharp(file.buffer)
-            .resize(mitadancho, mitadAlto)
-            .toFile(`imgs/categorias/small/${categoria.nombre}`);
+        for (let i = 0; i < nombres.length; i++) {
+            const nombre = nombres[i].replaceAll(" ", "-");
+            const file = req.files[i];
+            await sharp(file.buffer)
+                .resize({ width: 640 })
+                .toFile(`imgs/categorias/medium/${nombre}.webp`);
+            await sharp(file.buffer)
+                .resize({ width: 400 })
+                .toFile(`imgs/categorias/small/${nombre}.webp`);
+        }
+
+        return res.status(StatusCodes.NO_CONTENT).send();
+    }
+
+    async cambiarPortada(req, res) {
+        if (!req.file) {
+            throw new CustomErrors.NotFoundError("imagen no provista");
+        }
+
+        await sharp(req.file.buffer)
+            .resize({ width: 1800 })
+            .toFile(`imgs/portada.webp`);
+
+        return res.status(StatusCodes.NO_CONTENT).send();
     }
 }

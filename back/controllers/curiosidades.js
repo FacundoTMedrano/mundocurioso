@@ -6,124 +6,321 @@ import saveImg from "../utils/saveImg.js";
 import fs from "node:fs/promises";
 import { nanoid } from "nanoid";
 import borrarImagenes from "../utils/borrarImagenes.js";
+import slugify from "slugify";
 
 export default class CuriusidadesController {
-    async verTodo(req, res) {
-        if (!req.params.page) {
-            throw new CustomErrors.BadRequestError(
-                "numero de pagina no enviado"
-            );
+    async curiosidadPorId(req, res) {
+        if (!req.params.id) {
+            throw new CustomErrors.NotFoundError("numero de pagina no enviado");
+        }
+        const validate = z.string().min(1).safeParse(req.params.id);
+        if (!validate.success) {
+            throw new CustomErrors.BadRequestError("error en los datos");
         }
 
-        const page = Number(req.params.page);
-        const validate = z.number().safeParse(page);
+        const curiosidad = await pool
+            .query(
+                `
+                select
+                    c.*,
+                    array_agg(cat.nombre) as categorias
+                from
+                    curiosidades c
+                join curiosidad_categoria cc on
+                    cc.curiosidad_id = c.id
+                join categorias cat on
+                    cc.categoria_id = cat.id
+                    where c.id = $1
+                group by
+                    c.id;
+            `,
+                [validate.data]
+            )
+            .then((data) => data.rows[0]);
+
+        if (curiosidad) {
+            const html = await fs.readFile(
+                `curiosidades-html/${curiosidad.articulohtml}`,
+                "utf-8"
+            );
+            curiosidad.articulohtml = html;
+            curiosidad.categorias = curiosidad.categorias.reduce((ac, v) => {
+                ac[v] = true;
+                return ac;
+            }, {});
+            console.log(curiosidad.categoriasObj);
+        } else {
+            throw new CustomErrors.NotFoundError("no se encontro el slug");
+        }
+
+        return res.status(StatusCodes.OK).json(curiosidad);
+    }
+
+    async curiosidad(req, res) {
+        // console.log("query mandado", req.query.titulo);
+        if (!req.params.curiosidad) {
+            throw new CustomErrors.NotFoundError("numero de pagina no enviado");
+        }
+        const validate = z.string().min(1).safeParse(req.params.curiosidad);
+        if (!validate.success) {
+            throw new CustomErrors.BadRequestError("error en los datos");
+        }
+
+        const curiosidad = await pool
+            .query(
+                `
+                SELECT * FROM curiosidades
+                WHERE slug = $1;
+            `,
+                [validate.data]
+            )
+            .then((data) => data.rows[0]);
+
+        if (curiosidad) {
+            const html = await fs.readFile(
+                `curiosidades-html/${curiosidad.articulohtml}`,
+                "utf-8"
+            );
+            curiosidad.articulohtml = html;
+        } else {
+            throw new CustomErrors.NotFoundError("no se encontro el slug");
+        }
+
+        return res.status(StatusCodes.OK).json(curiosidad);
+    }
+
+    async verTodo(req, res) {
+        if (!req.query.page || !req.query.page_size) {
+            throw new CustomErrors.BadRequestError("Datos no enviados");
+        }
+        const page = Number(req.query.page);
+        const page_size = Number(req.query.page_size);
+
+        const validate = z
+            .object({
+                page: z.number(),
+                page_size: z.number(),
+            })
+            .safeParse({
+                page,
+                page_size,
+            });
+
         if (!validate.success) {
             throw new CustomErrors.BadRequestError("pagina no enviado");
         }
 
-        const limit = 10;
+        const limit = page_size;
         const offset = (page - 1) * limit;
 
-        const curiosidades = await pool.query(
+        const cantidad = await pool
+            .query(
+                `
+                SELECT COUNT(*)
+                from curiosidades
             `
+            )
+            .then((data) => Number(data.rows[0].count));
+
+        if (cantidad === 0) {
+            return res.status(StatusCodes.OK).json({
+                curiosidades: [],
+                page,
+                page_size,
+                totalPage: cantidad,
+            });
+        }
+
+        const curiosidades = await pool
+            .query(
+                `
                 SELECT * FROM curiosidades 
                 ORDER BY fecha_de_creacion DESC
                 LIMIT $1 OFFSET $2
             `,
-            [limit, offset]
-        );
-        return res.status(StatusCodes.OK).json(curiosidades.rows);
+                [limit, offset]
+            )
+            .then((data) => data.rows);
+
+        return res.status(StatusCodes.OK).json({
+            curiosidades,
+            page,
+            page_size,
+            totalPage: cantidad,
+        });
     }
 
     async porCategoria(req, res) {
-        if (!req.query.categoria || !req.query.page) {
+        if (!req.query.categoria || !req.query.page || !req.query.page_size) {
             throw new CustomErrors.BadRequestError("falta categoria y pagina");
         }
 
         const page = Number(req.query.page);
+        const page_size = Number(req.query.page_size);
+
         const validate = z
             .object({
-                categoria: z.string().min(1).max(20),
+                categoria: z.string().min(1),
                 page: z.number(),
+                page_size: z.number(),
             })
             .safeParse({
                 categoria: req.query.categoria,
                 page,
+                page_size,
             });
 
         if (!validate.success) {
             throw new CustomErrors.BadRequestError("Datos no enviados");
         }
 
-        const limit = 10;
+        const cantidad = await pool
+            .query(
+                `
+                select count(*) 
+                from categorias cat 
+                join curiosidad_categoria cc on cc.categoria_id = cat.id 
+                join curiosidades c on cc.curiosidad_id = c.id 
+                where cat.nombre = $1;
+            `,
+                [validate.data.categoria]
+            )
+            .then((data) => Number(data.rows[0].count));
+
+        if (cantidad === 0) {
+            return res.status(StatusCodes.OK).json({
+                curiosidades: [],
+                page,
+                page_size,
+                totalPage: cantidad,
+            });
+        }
+
+        const limit = page_size;
         const offset = (page - 1) * limit;
 
-        const curiosidades = await pool.query(
-            `
-                SELECT c.*
-                FROM curiosidad_categoria cc
-                JOIN categorias cat ON cat.id = cc.categoria_id
-                JOIN curiosidades c ON c.id = cc.curiosidad_id
-                WHERE cat.nombre = $1
+        const curiosidades = await pool
+            .query(
+                `
+                select c.*, cat.nombre 
+                from categorias cat
+                join curiosidad_categoria cc on cc.categoria_id = cat.id 
+                join curiosidades c on cc.curiosidad_id = c.id
+                where cat.nombre = $1
                 ORDER BY c.fecha_de_creacion DESC
                 LIMIT $2 OFFSET $3;
             `,
-            [validate.data.categoria, limit, offset]
-        );
-        return res.status(StatusCodes.OK).json(curiosidades.rows);
+                [validate.data.categoria, limit, offset]
+            )
+            .then((data) => data.rows);
+
+        return res.status(StatusCodes.OK).json({
+            curiosidades,
+            page,
+            page_size,
+            totalPage: cantidad,
+        });
     }
 
     async porBusqueda(req, res) {
-        if (!req.query.search || !req.query.page) {
+        if (!req.query.search || !req.query.page || !req.query.page_size) {
             throw new CustomErrors.BadRequestError("Datos no enviados");
         }
 
         const page = Number(req.query.page);
+        const page_size = Number(req.query.page_size);
+
         const validate = z
             .object({
-                search: z.string().min(1).max(20),
+                search: z.string(),
                 page: z.number(),
+                page_size: z.number(),
             })
             .safeParse({
                 search: req.query.search,
                 page,
+                page_size,
             });
-
+        console.log(validate.error);
         if (!validate.success) {
             throw new CustomErrors.BadRequestError("Datos incorrectos");
         }
 
-        const limit = 10;
+        const limit = validate.data.page_size;
         const offset = (page - 1) * limit;
 
-        // tuve que crear index en las columnas titulo, subtitulo, nombre(categoria) e instalar
-        // pg_trgm poniendole una similiridad de pg_trgm.similarity_threshold = 0.1;
-        const curiosidades = await pool.query(
-            `
-                SELECT
-                c.*,
-                cat.nombre
-                FROM
-                curiosidades c
-                JOIN curiosidad_categoria cc ON cc.curiosidad_id = c.id
-                JOIN categorias cat ON cat.id = cc.categoria_id
-                WHERE
-                c.titulo % $1
-                OR c.subtitulo % $1
-                OR cat.nombre % $1
-                ORDER BY
-                GREATEST(
-                    similarity(c.titulo, $1),
-                    similarity(c.subtitulo, $1),
-                    similarity(cat.nombre, $1)
-                  ) DESC
-                LIMIT $2 
-                OFFSET $3;
-            `,
-            [req.query.search, limit, offset]
-        );
+        const cantidad = await pool
+            .query(
+                `
+                SELECT count(c.id) 
+                FROM curiosidades c
+                WHERE 
+                    to_tsvector(
+                        c.titulo || ' ' ||
+                        c.subtitulo || ' ' || 
+                        COALESCE((
+                            SELECT string_agg(cat.nombre, ' ')
+                            FROM categorias cat
+                            JOIN curiosidad_categoria cc ON cc.categoria_id = cat.id
+                            WHERE cc.curiosidad_id = c.id
+                        ), '')
+                        ) @@ websearch_to_tsquery( $1 )
+                `,
+                [req.query.search]
+            )
+            .then((data) => Number(data.rows[0].count));
 
-        return res.status(StatusCodes.OK).json(curiosidades.rows);
+        if (cantidad === 0) {
+            return res.status(StatusCodes.OK).json({
+                curiosidades: [],
+                page,
+                page_size,
+                totalPage: cantidad,
+            });
+        }
+
+        //existe una mejor manera creando primero la tabla con una subconsulta y de ahi buscandola
+        //es decir select * from (select * from .... es decir la tabla con todos los join)
+        const curiosidades = await pool
+            .query(
+                `
+                SELECT c.*
+                FROM curiosidades c
+                WHERE 
+                    to_tsvector(
+                        c.titulo || ' ' ||
+                        c.subtitulo || ' ' || 
+                        COALESCE((
+                            SELECT string_agg(cat.nombre, ' ')
+                            FROM categorias cat
+                            JOIN curiosidad_categoria cc ON cc.categoria_id = cat.id
+                            WHERE cc.curiosidad_id = c.id
+                        ), '')
+                    ) @@ websearch_to_tsquery( $1 )
+                ORDER BY
+                    ts_rank(setweight(to_tsvector(c.titulo),'A') ||
+                    setweight(to_tsvector(c.subtitulo), 'B') ||
+                    setweight(to_tsvector(
+                            COALESCE((
+                            SELECT string_agg(cat.nombre, ' ')
+                            FROM categorias cat
+                            JOIN curiosidad_categoria cc ON cc.categoria_id = cat.id
+                            WHERE cc.curiosidad_id = c.id
+                        ), '')
+                    ),'C')
+                    ,websearch_to_tsquery( $1 )) DESC
+                LIMIT $2 OFFSET $3
+            `,
+                [req.query.search, limit, offset]
+            )
+            .then((data) => data.rows);
+
+        return res.status(StatusCodes.OK).json({
+            curiosidades,
+            page,
+            page_size,
+            totalPage: cantidad,
+        });
     }
 
     async crear(req, res) {
@@ -143,6 +340,28 @@ export default class CuriusidadesController {
         if (!curiosidad.success) {
             throw new CustomErrors.BadRequestError("datos no correspondientes");
         }
+
+        const slug = slugify(curiosidad.data.titulo, {
+            replacement: "-",
+            remove: /[^A-Za-z0-9\s-]/g,
+            lower: true,
+            strict: true,
+        });
+
+        const isExist = await pool
+            .query(
+                `
+                SELECT * FROM curiosidades
+                WHERE titulo = $1 OR slug = $2;
+            `,
+                [curiosidad.data.titulo, slug]
+            )
+            .then((data) => data.rows[0]);
+
+        if (isExist) {
+            throw new CustomErrors.ConflictError("titulo/slug ya utilizado");
+        }
+
         console.log(datos);
         const nombreImagenMuestra = await saveImg(req.file);
         const nombreHTML = `${nanoid()}.html`;
@@ -153,8 +372,8 @@ export default class CuriusidadesController {
 
         const respuesta = await pool.query(
             `
-            INSERT INTO curiosidades (titulo, subtitulo, imagen, articulohtml)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO curiosidades (titulo, subtitulo, imagen, articulohtml,slug)
+            VALUES ($1, $2, $3, $4, $5)
             RETURNING id;
         `,
             [
@@ -162,6 +381,7 @@ export default class CuriusidadesController {
                 curiosidad.data.subtitulo,
                 nombreImagenMuestra,
                 nombreHTML,
+                slug,
             ]
         );
 
@@ -204,15 +424,16 @@ export default class CuriusidadesController {
         if (!validate.success) {
             throw new CustomErrors.BadRequestError("dato no correspondiente");
         }
-        const response = await pool.query(
-            `
+        const curiosidad = await pool
+            .query(
+                `
                 SELECT * FROM curiosidades
                 WHERE id = $1;
             `,
-            [req.params.id]
-        );
+                [req.params.id]
+            )
+            .then((data) => data.rows[0]);
 
-        const curiosidad = response.rows[0];
         if (!curiosidad) {
             throw new CustomErrors.NotFoundError("not found moto id");
         }
@@ -229,7 +450,9 @@ export default class CuriusidadesController {
         );
 
         if (borrado.rowCount === 0) {
-            throw new Error("no se pudo borrar");
+            throw new CustomErrors.BadRequestError(
+                "no se pudo borrar chekee el id"
+            );
         }
 
         return res.status(StatusCodes.NO_CONTENT).send();
@@ -239,8 +462,8 @@ export default class CuriusidadesController {
         if (!req.params.id || !req.body.datos) {
             throw new CustomErrors.NotFoundError("valores no enviados");
         }
-
         const datos = JSON.parse(req.body.datos);
+        console.log(datos, req.file);
         const validate = z
             .object({
                 titulo: z.string().min(1),
@@ -268,6 +491,32 @@ export default class CuriusidadesController {
             throw new CustomErrors.NotFoundError("not found id");
         }
 
+        const slug = slugify(validate.data.titulo, {
+            replacement: "-",
+            remove: /[^A-Za-z0-9\s-]/g,
+            lower: true,
+            strict: true,
+        });
+
+        if (validate.data.titulo !== curiosidad.titulo) {
+            //slug actualizado
+
+            const isExist = await pool
+                .query(
+                    `
+                SELECT * FROM curiosidades
+                WHERE titulo = $1 OR slug = $2;
+            `,
+                    [validate.data.titulo, slug]
+                )
+                .then((data) => data.rows[0]);
+
+            if (isExist) {
+                throw new CustomErrors.ConflictError(
+                    "titulo/slug ya utilizado"
+                );
+            }
+        }
         let imagen = curiosidad.imagen;
         //borrado de lo anterior
         if (req.file) {
@@ -287,86 +536,48 @@ export default class CuriusidadesController {
         await pool.query(
             `
                 UPDATE curiosidades 
-                SET titulo = $1, subtitulo = $2, imagen = $3, articulohtml = $4 
-                WHERE id = $5;
+                SET titulo = $1, subtitulo = $2, imagen = $3, articulohtml = $4, slug = $5
+                WHERE id = $6;
             `,
             [
                 validate.data.titulo,
                 validate.data.subtitulo,
                 imagen,
                 nombreHTML,
+                slug,
                 req.params.id,
             ]
         );
 
         // actualizar categorias
-        const categegoriasDb = await pool.query(
+
+        const categorias = await pool
+            .query("SELECT * FROM categorias")
+            .then((data) => data.rows);
+
+        //borro todo lo anterior (son pocos datos y es mas facil de entender asi)
+        await pool.query(
             `
-                SELECT cc.categoria_id, c.nombre
-                FROM curiosidad_categoria cc
-                JOIN categorias c ON cc.categoria_id = c.id
-                WHERE cc.curiosidad_id = $1;
+                DELETE FROM curiosidad_categoria cc
+                WHERE curiosidad_id = $1
             `,
             [req.params.id]
         );
-        const listaSoloNombres = categegoriasDb.rows.map((v) => {
-            return v.nombre;
-        });
 
-        const cargar = validate.data.categorias.filter(
-            (v) => !listaSoloNombres.includes(v)
+        const agregar = categorias.filter((v) =>
+            validate.data.categorias.includes(v.nombre)
         );
 
-        const eliminar = listaSoloNombres.filter(
-            (v) => !validate.data.categorias.includes(v)
-        );
+        const queryText = `
+        INSERT INTO curiosidad_categoria (curiosidad_id, categoria_id)
+        VALUES ${agregar
+            .map((_, i) => `($${i * 2 + 1}, $${i * 2 + 2})`)
+            .join(", ")}
+        `;
 
-        if (cargar.length > 0) {
-            for (let i = 0; i < cargar.length; i++) {
-                const categoria = await pool
-                    .query(
-                        `
-                        SELECT * FROM categorias
-                        WHERE nombre = $1;
-                    `,
-                        [cargar[i]]
-                    )
-                    .then((data) => data.rows[0]);
+        const valores = agregar.map((v) => [req.params.id, v.id]).flat();
 
-                if (!categoria) {
-                    throw new Error("no se encontro la categoria");
-                }
-
-                await pool.query(
-                    `
-                        INSERT INTO curiosidad_categoria (curiosidad_id, categoria_id)
-                        VALUES ($1, $2);
-
-                    `,
-                    [curiosidad.id, categoria.id]
-                );
-            }
-        }
-
-        if (eliminar.length > 0) {
-            for (let i = 0; i < eliminar.length; i++) {
-                const categoria = categegoriasDb.rows.find(
-                    (v) => v.nombre === eliminar[i]
-                );
-
-                const borrado = await pool.query(
-                    `
-                    DELETE FROM curiosidad_categoria 
-                    WHERE curiosidad_id = $1 AND categoria_id = $2;
-                `,
-                    [curiosidad.id, categoria.categoria_id]
-                );
-
-                if (borrado.rowCount === 0) {
-                    throw new Error("no se pudo borrar");
-                }
-            }
-        }
+        await pool.query(queryText, valores);
 
         res.status(StatusCodes.OK).json({ message: "success" });
     }

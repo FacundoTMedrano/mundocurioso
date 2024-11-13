@@ -11,7 +11,7 @@ export default function validarImagen(file) {
     if (!isValidType) {
         return "Tipo de dato incorrecto";
     }
-    const isValidSize = file.size <= 5 * 1024 * 1024; // 5 megas
+    const isValidSize = file.size <= 2 * 1024 * 1024; // 5 megas
     if (!isValidSize) {
         return "Tamaño maximo por imagen excedido";
     }

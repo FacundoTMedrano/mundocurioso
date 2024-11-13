@@ -1,0 +1,19 @@
+@use "variables" as v;
+
+.search-page {
+    .buscador {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        .lupa {
+            font-size: 1.5rem;
+            padding-right: .3rem;
+            margin-bottom: -3px;
+        }
+        .input-div {
+        
+            
+        }
+    }
+}

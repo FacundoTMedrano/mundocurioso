@@ -1,2 +1,7 @@
 1- hacer que se puedan cambiar las imagenes de categoria y portada
 2- manejar el tamaño de las imagenes que se reciben
+3- cada titulo debe ser unico asi pueda ser correctamente buscado
+4- no permitir titulos que terminen en ? por que al navegar con navlink no los toma
+5- verificar la respuesta si es correcta enviar un [] vacio si es que no se encontro o un 404
+6- verificar que en verTodo reciba tambien en el query el limite
+7- modificar el tamaño con el que se guardan las imagenes de categoria

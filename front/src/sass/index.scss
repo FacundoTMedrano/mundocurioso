@@ -1,5 +1,17 @@
 @use "home";
 @use "dashboard";
 @use "root";
-@import url('https://fonts.googleapis.com/css2?family=Arimo:ital,wght@1,400..700&family=Lexend:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+@use "categoria-component";
+@use "back-next-component";
+@use "marcas-componente";
+@use "curiosidad-page";
+@use "search-page";
+@use "login-page";
+@use "curiosidades-grid-admin-compontent";
+@use "admin-dashboard";
+@use "imagenes-marcas";
+@use "cambiar-portada";
+@use "crear-curiosidad";
+
+@import url("https://fonts.googleapis.com/css2?family=Arimo:ital,wght@1,400..700&family=Lexend:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap");
