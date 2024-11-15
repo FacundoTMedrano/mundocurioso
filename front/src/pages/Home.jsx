@@ -6,6 +6,20 @@ import CuriosidadesGridHome from "../components/CuriosidadesGridHome";
 export default function Home() {
     return (
         <main className="home-page">
+            <h2>Curiosidades</h2>
+            <CuriosidadesGridHome />
+            <NavLink
+                onClick={() => {
+                    window.scrollTo({
+                        top: 0,
+                    });
+                }}
+                className={"ver-mas-curiosidades"}
+                to={"/ver-todo"}
+            >
+                ver mas curiosidades
+            </NavLink>
+
             <div className="grupo-de-categorias-home">
                 <h2>Categorias</h2>
                 <div className="contenedor-grid">
@@ -18,7 +32,7 @@ export default function Home() {
                         return (
                             <div className="div-imagen" key={`${v}img`}>
                                 <NavLink
-                                    to={`/categoria?categoria=${nombreURL}&page=${1}`}
+                                    to={`/categoria/?categoria=${nombreURL}&page=${1}`}
                                 >
                                     <div className="contenedor-imagen">
                                         <img
@@ -33,20 +47,6 @@ export default function Home() {
                     })}
                 </div>
             </div>
-
-            <CuriosidadesGridHome />
-
-            <NavLink
-                onClick={() => {
-                    window.scrollTo({
-                        top: 0,
-                    });
-                }}
-                className={"ver-mas-curiosidades"}
-                to={"/ver-todo"}
-            >
-                ver mas curiosidades
-            </NavLink>
         </main>
     );
 }

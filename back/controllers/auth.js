@@ -60,7 +60,7 @@ export class AuthController {
 
         res.cookie("jwt", refreshToken, cookie);
 
-        res.status(StatusCodes.OK).json({
+        return res.status(StatusCodes.OK).json({
             accessToken,
             id: user.id,
         });
@@ -96,13 +96,15 @@ export class AuthController {
 
         if (!decode) throw new CustomErrors.UnauthorizedError("bad token");
 
-        const query = `
-        SELECT * FROM admin 
-        WHERE id = $1;
-      `;
-        const values = [decode.user];
-        const response = await pool.query(query, values);
-        const user = response.rows[0];
+        const user = await pool
+            .query(
+                `
+                SELECT * FROM admin 
+                WHERE id = $1;
+            `,
+                [decode.user]
+            )
+            .then((data) => data.rows[0]);
 
         if (!user) {
             throw new CustomErrors.UnauthorizedError(
@@ -123,32 +125,31 @@ export class AuthController {
     }
 
     async forgotPassword(req, res) {
-        const email = z
-            .object({
-                email: z.string().email(),
-            })
-            .safeParse(req.body);
-
+        const email = z.string().email().safeParse(req.body.email);
         if (!email.success) {
             throw new CustomErrors.BadRequestError(
                 "Please provide valid email"
             );
         }
 
-        const query = `
-        SELECT * FROM admin 
-        WHERE email = $1;
-      `;
-        const values = [email.data.email];
-        const response = await pool.query(query, values);
-        const user = response.rows[0];
+        const user = await pool
+            .query(
+                `
+                SELECT * FROM admin 
+                WHERE email = $1;
+            `,
+                [email.data.email]
+            )
+            .then((data) => data.rows[0]);
 
         if (!user) {
-            throw new CustomErrors.BadRequestError(
-                "Please provide valid email"
-            );
+            //para que no se detecte a travez de intetos
+            return res.status(StatusCodes.OK).json({
+                msg: "Please check your email for reset password link",
+            });
         }
-        const passwordToken = crypto.randomBytes(70).toString("hex");
+
+        const passwordToken = crypto.randomBytes(50).toString("hex");
         const passwordTokenHash = await bcrypt.hash(passwordToken, 10);
 
         await sendResetEmail({
@@ -158,22 +159,17 @@ export class AuthController {
         });
 
         const password_token_expiration_date = new Date(Date.now() + ms("10m")); //debe hacerse con orario mundial
-        const queryUpdate = `
-        UPDATE admin SET password_token = $1,
-        password_token_expiration_date = $2
-        WHERE email = $3
-        `;
 
-        const valuesUpdate = [
-            passwordTokenHash,
-            password_token_expiration_date,
-            user.email,
-        ];
-        await pool.query(queryUpdate, valuesUpdate);
+        await pool.query(
+            `
+            UPDATE admin SET password_token = $1,
+            password_token_expiration_date = $2
+            WHERE email = $3;
+        `,
+            [passwordTokenHash, password_token_expiration_date, user.email]
+        );
 
-        // await user.save();
-
-        res.status(StatusCodes.OK).json({
+        return res.status(StatusCodes.OK).json({
             msg: "Please check your email for reset password link",
         });
     }
@@ -191,21 +187,23 @@ export class AuthController {
             throw new CustomErrors.BadRequestError("Please provide all values");
         }
 
-        const query = `
+        const user = await pool
+            .query(
+                `
             SELECT * FROM admin 
             WHERE email = $1;
-        `;
-        const values = [validacion.data.email];
-        const response = await pool.query(query, values);
-        const user = response.rows[0];
+        `,
+                [validacion.data.email]
+            )
+            .then((data) => data.rows[0]);
 
         if (!user) {
             throw new CustomErrors.UnauthenticatedError("invalid credentials");
         }
 
         const match = await bcrypt.compare(
-            user.password_token,
-            validacion.data.token
+            validacion.data.token,
+            user.password_token
         );
 
         if (!match) {
@@ -220,46 +218,47 @@ export class AuthController {
         }
 
         const passHashed = await bcrypt.hash(validacion.data.password, 10);
-        const queryUpdate = `
+
+        await pool.query(
+            `
             UPDATE admin SET password = $1,
             password_token = $2,
             password_token_expiration_date = $3
-            WHERE email = $4
-        `;
-        const valuesUpdate = [passHashed, null, null, validacion.data.email];
-        await pool.query(queryUpdate, valuesUpdate);
+            WHERE email = $4;
+        `,
+            [passHashed, null, null, validacion.data.email]
+        );
 
-        res.status(StatusCodes.OK).json({
+        return res.status(StatusCodes.OK).json({
             msg: "reset password",
         });
     }
 
     async cambiarPassword(req, res) {
+        // req.id sacado del token
         const validacion = z
             .object({
                 oldPassword: z.string(),
                 newPassword: z.string().min(5).max(20),
                 repetNewPassword: z.string().min(5).max(20),
             })
-            .refine((data) => data.oldPassword !== data.newPassword, {
-                path: ["newPassword"],
-            })
-            .refine((data) => data.newPassword === data.repetNewPassword, {
-                path: ["repetNewPassword"],
-            })
+            .refine((data) => data.oldPassword !== data.newPassword)
+            .refine((data) => data.newPassword === data.repetNewPassword)
             .safeParse(req.body);
 
         if (!validacion.success) {
             throw new CustomErrors.BadRequestError("Please provide all values");
         }
 
-        const query = `
+        const user = await pool
+            .query(
+                `
             SELECT * FROM admin 
             WHERE id = $1;
-        `;
-        const values = [req.id];
-        const response = await pool.query(query, values);
-        const user = response.rows[0];
+        `,
+                [req.id]
+            )
+            .then((data) => data.rows[0]);
 
         if (!user) {
             throw new CustomErrors.BadRequestError("Please provide all values");
@@ -278,14 +277,15 @@ export class AuthController {
 
         const newPassword = await bcrypt.hash(validacion.data.newPassword, 10);
 
-        const queryUpdate = `
+        await pool.query(
+            `
             UPDATE admin SET password = $1
             WHERE id = $2
-        `;
-        const valuesUpdate = [newPassword, user.id];
-        await pool.query(queryUpdate, valuesUpdate);
+        `,
+            [newPassword, user.id]
+        );
 
-        res.status(StatusCodes.OK).json({
+        return res.status(StatusCodes.OK).json({
             msg: "password change",
         });
     }

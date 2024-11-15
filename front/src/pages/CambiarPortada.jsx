@@ -58,7 +58,6 @@ export default function CambiarPortada() {
         } else {
             const img = new Image();
             img.onload = () => {
-                console.log(img);
                 if (img.naturalWidth < 1600) {
                     setPortada((prev) => {
                         return { ...prev, err: "imagen poco ancha" };
@@ -81,8 +80,6 @@ export default function CambiarPortada() {
     function cancelar() {
         setPortada({ file: null, url: `${base}/imgs/portada.webp`, err: "" });
     }
-
-    console.log(portada, !portada.file || !portada.err);
 
     return (
         <main className="cambiar-portada">

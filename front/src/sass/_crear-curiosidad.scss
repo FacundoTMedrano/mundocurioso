@@ -1,4 +1,5 @@
 @use "variables" as v;
+@use "mixin" as m;
 
 .imagen-box {
     width: fit-content;
@@ -43,19 +44,7 @@
         margin: 0.8rem auto 1rem auto;
 
         button {
-            cursor: pointer;
-            display: block;
-            background-color: v.$color-1;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            // padding: 10px 20px;
-            padding: 0.3rem 0.7rem;
-            font-family: v.$fuente-secundaria;
-
-            &:hover {
-                background-color: v.$color-2;
-            }
+            @include m.boton;
         }
     }
 }

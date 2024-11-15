@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import useAuth from "../hooks/useAuth";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, NavLink } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { axiosPublic } from "../services/api";
 
@@ -37,6 +37,7 @@ export default function Login() {
         },
         onSuccess: (data) => {
             console.log("success, loageado", data);
+            localStorage.setItem("admin", true);
             setAuth(data);
             navigate("/admin");
         },
@@ -94,6 +95,9 @@ export default function Login() {
                     </div>
                     <button>ingresar</button>
                 </form>
+                <NavLink className={"olvidaste-tu-contraseña"} to={"/recuperar-contraseña"}>
+                    olvidaste tu contraseña?
+                </NavLink>
                 {logIn.isError && <p>error</p>}
                 {logIn.isPending && <p>loading...</p>}
             </div>

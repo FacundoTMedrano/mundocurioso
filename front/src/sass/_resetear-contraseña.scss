@@ -1,0 +1,28 @@
+@use "variables" as v;
+@use "mixin" as m;
+
+.reset-password {
+    form {
+        @include m.casilla;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        div {
+            display: flex;
+            flex-direction: column;
+            padding-block: 0.45rem;
+        }
+        button {
+            @include m.boton;
+            margin-top: 0.7rem;
+        }
+    }
+    .err {
+        text-align: center;
+        color: red;
+    }
+    .success {
+        text-align: center;
+        color: blue;
+    }
+}

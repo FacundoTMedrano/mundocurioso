@@ -15,7 +15,6 @@ export default function VerTodo() {
             const { data } = await axiosPublic(`curiosidades/vertodo`, {
                 params: { search: "", page, page_size: 10 },
             });
-            console.log(data);
             return data;
         },
         refetchOnWindowFocus: false,

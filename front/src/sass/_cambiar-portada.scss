@@ -1,4 +1,5 @@
 @use "variables" as v;
+@use "mixin" as m;
 
 .cambiar-portada {
     .portada {
@@ -19,11 +20,9 @@
         display: flex;
         justify-content: center;
         margin: 1rem;
+        gap: 0.7rem;
         button {
-            cursor: pointer;
-            padding: 0.2rem 0.4rem;
-            font-family: v.$fuente-secundaria;
-            margin: 0.2rem;
+            @include m.boton;
         }
     }
 }

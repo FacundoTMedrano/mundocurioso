@@ -1,0 +1,30 @@
+@use "variables" as v;
+
+@mixin boton {
+    cursor: pointer;
+    display: block;
+    background-color: v.$color-1;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    // padding: 10px 20px;
+    padding: 0.3rem 0.7rem;
+    font-family: v.$fuente-secundaria;
+
+    &:hover {
+        background-color: v.$color-2;
+    }
+
+    &:disabled {
+        opacity: 0.8;
+    }
+}
+
+@mixin casilla {
+    border: 1px solid rgba(128, 128, 128, 0.637);
+    box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.096);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 0.5rem auto 0.5rem auto;
+    max-width: 25rem;
+}

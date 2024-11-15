@@ -6,11 +6,13 @@ import isExistImage from "../utils/isExistImage.js";
 
 export default class CategoriasPortada {
     async cambiarCategoriaImg(req, res) {
-        console.log(req.files, req.body.nombres);
-        if (!req.body.nombres || !req.files) {
-            throw new CustomErrors.NotFoundError("datos no provistos");
-        }
-        const validate = z.array(z.string()).safeParse([...req.body.nombres]);
+        const validate = z
+            .object({
+                imagenes: z.array(z.instanceof(File)).min(1),
+                nombres: z.array(z.string()).min(1),
+            })
+            .safeParse({ imagenes: req.files, nombres: [...req.body.nombres] });
+
         if (!validate.success) {
             throw new CustomErrors.BadRequestError("datos erroneos");
         }
@@ -40,7 +42,9 @@ export default class CategoriasPortada {
     }
 
     async cambiarPortada(req, res) {
-        if (!req.file) {
+        const validate = z.instanceof(File).safeParse(req.file);
+
+        if (!validate.success) {
             throw new CustomErrors.NotFoundError("imagen no provista");
         }
 

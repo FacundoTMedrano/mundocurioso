@@ -21,7 +21,5 @@ export default function CuriosidadesGridHome() {
         return <p>Error</p>;
     }
 
-    console.log(curiosidades.data);
-
     return <CuriosidadesGrid curiosidades={curiosidades.data.curiosidades} />;
 }

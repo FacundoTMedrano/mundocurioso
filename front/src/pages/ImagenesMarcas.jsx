@@ -80,20 +80,22 @@ export default function ImagenesMarcas() {
                     })}
                 </div>
             </div>
-            <button
-                onClick={() => {
-                    enviar.mutate();
-                }}
-                disabled={!aceptarCambios || enviar.isPending}
-            >
-                aceptar cambios
-            </button>
-            <button
-                onClick={cancelarTodosLosCambios}
-                disabled={!aceptarCambios}
-            >
-                cancelar cambios
-            </button>
+            <div className="botones-aceptar-envio">
+                <button
+                    onClick={() => {
+                        enviar.mutate();
+                    }}
+                    disabled={!aceptarCambios || enviar.isPending}
+                >
+                    aceptar cambios
+                </button>
+                <button
+                    onClick={cancelarTodosLosCambios}
+                    disabled={!aceptarCambios}
+                >
+                    cancelar cambios
+                </button>
+            </div>
             {enviar.isPending && <p>Enviando...</p>}
             {enviar.isError && <p>Error: {enviar.error.message}</p>}
         </div>

@@ -1,0 +1,28 @@
+@use "variables" as v;
+@use "mixin" as m;
+
+.olvide-la-contraseña {
+    form {
+        @include m.casilla;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        input {
+            margin: auto;
+        }
+
+        button {
+            @include m.boton;
+            margin-top: 0.8rem;
+        }
+    }
+    .err {
+        text-align: center;
+        color: red;
+    }
+    .success {
+        text-align: center;
+        color: blue;
+    }
+}

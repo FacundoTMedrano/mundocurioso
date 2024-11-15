@@ -13,7 +13,6 @@ export default function CrearCuriosidad() {
     const axiosPrivate = useAxiosPrivate();
     const queryClient = useQueryClient();
     const { id } = useParams();
-    console.log(id);
 
     const editorRef = useRef(null);
     const [content, setContent] = useState("");
@@ -31,7 +30,6 @@ export default function CrearCuriosidad() {
             const result = await axiosPrivate(
                 `curiosidades/curiosidad/por-id/${id}`
             );
-            console.log(result.data);
             return result.data;
         },
         retry: (failureCount, error) => {

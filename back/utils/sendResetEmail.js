@@ -1,9 +1,8 @@
 import { sendEmail } from "./sendEmail.js";
 
 export async function sendResetEmail({ name, email, token, origin }) {
-    const resetURL = `${origin}/user/reset-password?token=${token}&email=${email}`;
     const message = `<p>Please reset password by clicking on the following link : 
-  <a href="${resetURL}">Reset Password</a></p>`;
+  <a href="${`${origin}/resetear-contraseña?token=${token}&email=${email}`}">Reset Password</a></p>`;
 
     return sendEmail({
         to: email,

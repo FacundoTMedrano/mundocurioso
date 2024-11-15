@@ -10,7 +10,6 @@ export default function AdminSearch() {
     const search = searchParams.get("search") || "";
     const page = Number(searchParams.get("page") || 1);
 
-    console.log(search, page);
 
     const curiosidades = useQuery({
         queryKey: ["curiosidades", { search, page }],

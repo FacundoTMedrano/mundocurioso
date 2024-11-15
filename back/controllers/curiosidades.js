@@ -10,12 +10,11 @@ import slugify from "slugify";
 
 export default class CuriusidadesController {
     async curiosidadPorId(req, res) {
-        if (!req.params.id) {
-            throw new CustomErrors.NotFoundError("numero de pagina no enviado");
-        }
-        const validate = z.string().min(1).safeParse(req.params.id);
+        const validate = z.string().uuid().safeParse(req.params.id);
         if (!validate.success) {
-            throw new CustomErrors.BadRequestError("error en los datos");
+            throw new CustomErrors.BadRequestError(
+                "error en los datos enviados"
+            );
         }
 
         const curiosidad = await pool
@@ -57,10 +56,6 @@ export default class CuriusidadesController {
     }
 
     async curiosidad(req, res) {
-        // console.log("query mandado", req.query.titulo);
-        if (!req.params.curiosidad) {
-            throw new CustomErrors.NotFoundError("numero de pagina no enviado");
-        }
         const validate = z.string().min(1).safeParse(req.params.curiosidad);
         if (!validate.success) {
             throw new CustomErrors.BadRequestError("error en los datos");
@@ -90,9 +85,6 @@ export default class CuriusidadesController {
     }
 
     async verTodo(req, res) {
-        if (!req.query.page || !req.query.page_size) {
-            throw new CustomErrors.BadRequestError("Datos no enviados");
-        }
         const page = Number(req.query.page);
         const page_size = Number(req.query.page_size);
 
@@ -151,10 +143,6 @@ export default class CuriusidadesController {
     }
 
     async porCategoria(req, res) {
-        if (!req.query.categoria || !req.query.page || !req.query.page_size) {
-            throw new CustomErrors.BadRequestError("falta categoria y pagina");
-        }
-
         const page = Number(req.query.page);
         const page_size = Number(req.query.page_size);
 
@@ -223,10 +211,6 @@ export default class CuriusidadesController {
     }
 
     async porBusqueda(req, res) {
-        if (!req.query.search || !req.query.page || !req.query.page_size) {
-            throw new CustomErrors.BadRequestError("Datos no enviados");
-        }
-
         const page = Number(req.query.page);
         const page_size = Number(req.query.page_size);
 
@@ -241,7 +225,7 @@ export default class CuriusidadesController {
                 page,
                 page_size,
             });
-        console.log(validate.error);
+
         if (!validate.success) {
             throw new CustomErrors.BadRequestError("Datos incorrectos");
         }
@@ -324,18 +308,18 @@ export default class CuriusidadesController {
     }
 
     async crear(req, res) {
-        if (!req.body.datos || !req.file) {
-            throw new CustomErrors.BadRequestError("datos no recibidos");
-        }
-        const datos = JSON.parse(req.body.datos);
         const curiosidad = z
             .object({
                 titulo: z.string().min(1),
                 subtitulo: z.string().min(1),
                 categorias: z.array(z.string()).min(1),
                 curiosidad: z.string().min(1),
+                imagen: z.instanceof(File),
             })
-            .safeParse(datos);
+            .safeParse({
+                ...JSON.parse(req.body.datos || "{}"),
+                imagen: req.file,
+            });
 
         if (!curiosidad.success) {
             throw new CustomErrors.BadRequestError("datos no correspondientes");
@@ -362,7 +346,6 @@ export default class CuriusidadesController {
             throw new CustomErrors.ConflictError("titulo/slug ya utilizado");
         }
 
-        console.log(datos);
         const nombreImagenMuestra = await saveImg(req.file);
         const nombreHTML = `${nanoid()}.html`;
         await fs.writeFile(
@@ -370,39 +353,39 @@ export default class CuriusidadesController {
             curiosidad.data.curiosidad
         );
 
-        const respuesta = await pool.query(
-            `
+        const curiosidad_id = await pool
+            .query(
+                `
             INSERT INTO curiosidades (titulo, subtitulo, imagen, articulohtml,slug)
             VALUES ($1, $2, $3, $4, $5)
             RETURNING id;
         `,
-            [
-                curiosidad.data.titulo,
-                curiosidad.data.subtitulo,
-                nombreImagenMuestra,
-                nombreHTML,
-                slug,
-            ]
-        );
-
-        const curiosidad_id = respuesta.rows[0].id;
+                [
+                    curiosidad.data.titulo,
+                    curiosidad.data.subtitulo,
+                    nombreImagenMuestra,
+                    nombreHTML,
+                    slug,
+                ]
+            )
+            .then((data) => data.rows[0].id);
 
         for (let i = 0; i < curiosidad.data.categorias.length; i++) {
             const categoriaNombre = curiosidad.data.categorias[i];
 
-            const response = await pool.query(
-                `
+            const categoria_id = await pool
+                .query(
+                    `
                 SELECT * FROM categorias
                 WHERE nombre = $1;
             `,
-                [categoriaNombre]
-            );
+                    [categoriaNombre]
+                )
+                .then((data) => data.rows[0]?.id);
 
-            if (!response.rows[0]) {
+            if (!categoria_id) {
                 throw new Error("no se encontro la categoria");
             }
-
-            const categoria_id = response.rows[0].id;
 
             await pool.query(
                 `
@@ -416,11 +399,7 @@ export default class CuriusidadesController {
     }
 
     async delete(req, res) {
-        if (!req.params.id) {
-            throw new CustomErrors.NotFoundError("not found moto id");
-        }
-
-        const validate = z.string().min(1).safeParse(req.params.id);
+        const validate = z.string().uuid().safeParse(req.params.id);
         if (!validate.success) {
             throw new CustomErrors.BadRequestError("dato no correspondiente");
         }
@@ -459,19 +438,18 @@ export default class CuriusidadesController {
     }
 
     async update(req, res) {
-        if (!req.params.id || !req.body.datos) {
-            throw new CustomErrors.NotFoundError("valores no enviados");
-        }
-        const datos = JSON.parse(req.body.datos);
-        console.log(datos, req.file);
         const validate = z
             .object({
                 titulo: z.string().min(1),
                 subtitulo: z.string().min(1),
                 categorias: z.array(z.string()).min(1),
                 curiosidad: z.string().min(1),
+                id: z.string().uuid(),
             })
-            .safeParse(datos);
+            .safeParse({
+                ...JSON.parse(req.body.datos || "{}"),
+                id: req.params.id,
+            });
 
         if (!validate.success) {
             throw new CustomErrors.BadRequestError("datos no correspondientes");
@@ -579,6 +557,6 @@ export default class CuriusidadesController {
 
         await pool.query(queryText, valores);
 
-        res.status(StatusCodes.OK).json({ message: "success" });
+        return res.status(StatusCodes.OK).json({ message: "success" });
     }
 }

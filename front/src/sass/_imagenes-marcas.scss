@@ -1,4 +1,5 @@
 @use "variables" as v;
+@use "mixin" as m;
 
 .contenedor-grid-admin {
     display: grid;
@@ -21,14 +22,22 @@
         .div-imagen-botones {
             display: flex;
             justify-content: center;
+            gap: 0.7rem;
 
             button {
-                cursor: pointer;
-                margin: 0 0.3rem;
-                font-family: v.$fuente-secundaria;
-                font-size: 1.1rem;
-                padding: 0.2rem 0.5rem;
+                @include m.boton;
             }
         }
+    }
+}
+
+.botones-aceptar-envio {
+    display: flex;
+    justify-content: center;
+    gap: .7rem;
+    padding-inline: 10px;
+    margin-bottom: 1rem;
+    button {
+        @include m.boton;
     }
 }

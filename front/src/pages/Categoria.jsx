@@ -10,8 +10,6 @@ export default function Categoria() {
     const categoria = searchParams.get("categoria") || ""; // Si no existe, retorna una cadena vacía
     const page = Number(searchParams.get("page") || 1);
 
-    console.log(categoria, page);
-
     const curiosidades = useQuery({
         queryKey: ["curiosidades", { categoria, page }],
         queryFn: async () => {

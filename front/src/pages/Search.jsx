@@ -17,12 +17,9 @@ export default function Search() {
         queryFn: async () => {
             let url =
                 search === "" ? `curiosidades/vertodo` : `curiosidades/search`;
-            console.log(search, url);
             const { data } = await axiosPublic(url, {
                 params: { search, page, page_size: 10 },
             });
-            console.log(data);
-
             return data;
         },
         refetchOnWindowFocus: false,

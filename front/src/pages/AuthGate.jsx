@@ -7,17 +7,17 @@ export default function AuthGate() {
     const { loading, setLoading } = useAuth();
     const refresh = useRefresh();
 
-    async function cargarUsuario() {
-        try {
-            await refresh();
-        } catch (error) {
-            console.log(error);
-        } finally {
-            setLoading(false);
-        }
-    }
-
     useEffect(() => {
+        async function cargarUsuario() {
+            try {
+                await refresh();
+            } catch (error) {
+                console.log(error);
+            } finally {
+                setLoading(false);
+            }
+        }
+
         if (loading) {
             cargarUsuario();
         }

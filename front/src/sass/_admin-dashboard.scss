@@ -1,200 +1,247 @@
 @use "variables" as v;
 
+// position: relative;
 .header-dash-admin {
-    position: relative;
-    .dash {
-        .burger {
-            position: fixed;
-            top: 12px;
-            border-radius: 10px;
-            background-color: black;
-            right: 10px; //por alguna razon funciona mal si no esta separado del borde
-            color: white;
-            z-index: 100000;
+    .portada-home {
+        background-image: url("http://localhost:5173/imgs/portada.webp");
+        background-position: 40% 30%;
+        background-repeat: no-repeat;
+        background-size: cover;
 
-            // @media (min-width: v.$breakpoint-large-big-desktop) {
-            //     display: none;
-            // }
+        .opacity-portada {
+            position: relative;
+            z-index: 10000;
+            background-color: rgba(0, 0, 0, 0.295);
+
+            h1 {
+                margin-top: 0;
+                padding: 4rem;
+                margin-bottom: 0;
+
+                a {
+                    color: white;
+                    width: fit-content;
+                    margin: auto;
+                    font-family: v.$fuente-primaria;
+                }
+            }
+        }
+    }
+}
+
+.dash-admin {
+    @media (min-width: v.$breakpoint-large-desktop) {
+        position: sticky;
+        top: 0;
+    }
+
+    .burger {
+        position: fixed;
+        top: 12px;
+        border-radius: 10px;
+        background-color: black;
+        right: 10px; //por alguna razon funciona mal si no esta separado del borde
+        color: white;
+        z-index: 1000000;
+
+        @media (min-width: v.$breakpoint-large-desktop) {
+            display: none;
+        }
+    }
+
+    .menu {
+        z-index: 100000;
+        position: fixed;
+        right: 0;
+        top: 0;
+        height: 100%;
+        width: 100%;
+        max-width: 17rem;
+        background-color: rgba(0, 0, 0, 0.596);
+
+        overflow: scroll;
+        transform: translateX(100%);
+        visibility: hidden;
+        opacity: 0;
+        transition: all 500ms ease;
+
+        @media (min-width: v.$breakpoint-large-desktop) {
+            transform: none;
+            position: static;
+            visibility: visible;
+            opacity: 1;
+            max-width: 100%;
+            // height: fit-content;
         }
 
-        .menu {
-            z-index: 10000;
-            position: fixed;
-            right: 0;
-            top: 0;
-            height: 100%;
-            width: 100%;
-            max-width: 17rem;
-            background-color: rgba(0, 0, 0, 0.596);
+        &.open {
+            transform: translateX(0%);
+            visibility: visible;
+            opacity: 1;
+        }
 
-            overflow: scroll;
-            transform: translateX(100%);
-            visibility: hidden;
-            opacity: 0;
-            transition: all 500ms ease;
+        nav {
+            .primer-ul {
+                padding-top: 3rem;
+                padding-left: 0.5rem;
 
-            // @media (min-width: v.$breakpoint-large-big-desktop) {
-            //     transform: translateX(0);
-            //     position: static;
-            //     transform: none;
-            //     visibility: visible;
-            //     opacity: 1;
-            //     max-width: 100%;
-            //     height: fit-content;
-            // }
+                @media (min-width: v.$breakpoint-large-desktop) {
+                    padding: 0;
+                    margin: 0;
+                    display: flex;
+                    justify-content: space-evenly;
+                    align-items: center;
+                    // gap: .6rem;
+                    max-width: 79rem;
+                    margin: auto;
+                }
 
-            &.open {
-                transform: translateX(0%);
-                visibility: visible;
-                opacity: 1;
-            }
+                & > li {
+                    padding-block: 0.5rem;
+                }
 
-            nav {
-                .primer-ul {
-                    padding-top: 3rem;
-                    padding-left: 0.5rem;
+                .link {
+                    a {
+                        color: white;
+                        font-size: 1rem;
+                        border-left: 0 solid white;
+                        transition: all 100ms ease;
 
-                    // @media (min-width: v.$breakpoint-large-big-desktop) {
-                    //     display: grid;
-                    //     grid-template-columns: repeat(12, 1fr);
-                    //     text-align: center;
-                    //     justify-content: center;
-                    //     padding: 0rem 0;
-                    //     margin: 0 auto;
-                    //     align-items: center;
-                    //     max-width: 100rem;
-                    // }
+                        &:hover {
+                            border-left: 5px solid white;
+                            @media (min-width: v.$breakpoint-large-desktop) {
+                                border-left: none;
+                                transform: scale(1.02);
+                            }
+                        }
+                    }
+                }
 
-                    > li {
-                        padding-block: 0.5rem;
+                .input-busqueda {
+                    input {
+                        border-radius: 8px;
+                        border: 1px solid black;
+                        text-indent: 0.5rem;
+                        font-family: v.$fuente-secundaria;
+                    }
+                }
 
-                        .link-categorias {
-                            display: flex;
-                            align-items: center;
-                            cursor: pointer;
+                .logout {
+                    display: flex;
+                    // border: 1px solid red;
 
-                            &:hover {
-                                .text-div {
-                                    button {
-                                        border-left: 5px solid white;
-                                    }
+                    @media (min-width: v.$breakpoint-large-desktop) {
+                        display: block;
+                    }
+
+                    button {
+                        cursor: pointer;
+                        background: none;
+                        background-color: v.$color-1;
+                        border-radius: 10px;
+                        padding: 0.4rem 0.6rem;
+                        border: none;
+                        font-family: v.$fuente-secundaria;
+                        color: rgb(240, 77, 77);
+                        font-size: 1.1rem;
+                        transition: all 100ms ease;
+                        margin: auto;
+
+                        &:hover {
+                            transform: scale(1.05);
+                        }
+                    }
+                }
+
+                .link-categorias {
+                    &:hover {
+                        .submenu-boton {
+                            border-left: 5px solid white;
+
+                            @media (min-width: v.$breakpoint-large-desktop) {
+                                border-left: none;
+
+                                .svg-div {
+                                    transform: scale(2) translateY(0.12rem)
+                                        rotate(90deg);
                                 }
                             }
-                            .text-div {
-                                a {
-                                    display: none;
-                                    color: white;
-                                    font-size: 1.1rem;
-                                    border-left: 0 solid white;
-                                    transition: all 100ms ease;
+                        }
 
-                                    &:hover {
-                                        border-left: 5px solid white;
-                                    }
-                                }
-                                button {
-                                    cursor: pointer;
-                                    background: none;
-                                    border: none;
-                                    font-family: v.$fuente-secundaria;
-                                    color: white;
-                                    font-size: 1.1rem;
-                                    border-left: 0 solid white;
-                                    transition: all 100ms ease;
+                        @media (min-width: v.$breakpoint-large-desktop) {
+                            .categorias-div {
+                                height: 18rem;
+                                padding: 0;
+                                margin-left: 1rem;
+                                margin-top: 0.3rem;
+                                visibility: visible;
+                                opacity: 1;
 
-                                    // &:hover {
-                                    //     border-left: 5px solid white;
-                                    // }
-                                }
-                            }
-
-                            .svg-div {
-                                display: flex;
-                                align-items: center;
-                                color: white;
-                                padding-left: 0.5rem;
-
-                                svg {
-                                    cursor: pointer;
-                                    transform: scale(2);
-                                    transition: all 100ms;
-                                }
-
-                                &.open {
-                                    svg {
-                                        transform: scale(2) rotate(90deg);
+                                li {
+                                    a:hover {
+                                        border-left: none;
+                                        text-decoration: underline;
                                     }
                                 }
                             }
                         }
-                        .categorias-div {
-                            overflow: hidden;
-                            height: 0;
-                            transition: all 100ms ease;
+                    }
 
-                            ul {
-                                padding-left: 1.5rem;
-                                li {
-                                    padding-block: 0.3rem;
-                                    a {
-                                        color: white;
-                                        font-size: 1.1rem;
-                                        border-left: 0 solid white;
-                                        transition: all 100ms ease;
+                    .submenu-boton {
+                        padding: 0;
+                        cursor: pointer;
+                        background: none;
+                        border: none;
+                        font-family: v.$fuente-secundaria;
+                        color: white;
+                        font-size: 1rem;
+                        border-left: 0 solid white;
+                        transition: all 100ms ease;
+                        display: block;
+                        text-align: left;
+                        width: 100%;
 
-                                        &:hover {
-                                            border-left: 5px solid white;
-                                        }
-                                    }
-                                }
-                            }
+                        .svg-div {
+                            color: white;
+                            transform: scale(2) translateY(0.12rem);
+                            transition: all 100ms;
 
                             &.open {
-                                // overflow: auto;
-                                height: 19rem;
+                                transform: scale(2) translateY(0.12rem)
+                                    rotate(90deg);
                             }
                         }
+                    }
 
-                        .input-busqueda {
-                            input {
-                                border-radius: 8px;
-                                border: 1px solid black;
-                                text-indent: 0.5rem;
-                                font-family: v.$fuente-secundaria;
-                            }
+                    .categorias-div {
+                        overflow: hidden;
+                        height: 0;
+                        transition: all 100ms ease;
+                        padding-left: 1.5rem;
+                        padding-top: 0.1rem;
+
+                        @media (min-width: v.$breakpoint-large-desktop) {
+                            background-color: grey;
+                            position: absolute;
+                            visibility: hidden;
+                            opacity: 0;
                         }
 
-                        .link {
+                        &.open {
+                            height: 18rem;
+                        }
+
+                        li {
+                            padding-block: 0.3rem;
+
                             a {
                                 color: white;
-                                font-size: 1.1rem;
+                                font-size: 1.05rem;
                                 border-left: 0 solid white;
                                 transition: all 100ms ease;
 
                                 &:hover {
                                     border-left: 5px solid white;
-                                }
-                            }
-                        }
-
-                        .logout {
-                            display: flex;
-
-                            button {
-                                cursor: pointer;
-                                background: none;
-                                background-color: v.$color-1;
-                                border-radius: 10px;
-                                padding: 0.4rem 0.6rem;
-                                border: none;
-                                font-family: v.$fuente-secundaria;
-                                color: rgb(240, 77, 77);
-                                font-size: 1.1rem;
-                                transition: all 100ms ease;
-                                margin: auto;
-
-                                &:hover {
-                                    transform: scale(1.05);
                                 }
                             }
                         }
